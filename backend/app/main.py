@@ -53,6 +53,27 @@ async def lifespan(app: FastAPI):
     except Exception:
         logger.info("Ollama is not running locally. Model fallback mode will be active.")
 
+    # 3. Automatic Telegram Bot Dispatch (Polling or Webhook)
+    if settings.TELEGRAM_BOT_TOKEN and not settings.TELEGRAM_BOT_TOKEN.startswith("dummy"):
+        if settings.TELEGRAM_WEBHOOK_URL:
+            try:
+                setup_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
+                payload = {
+                    "url": settings.TELEGRAM_WEBHOOK_URL,
+                    "secret_token": settings.TELEGRAM_WEBHOOK_SECRET,
+                    "allowed_updates": ["message", "callback_query"],
+                }
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    wh_res = await client.post(setup_url, json=payload)
+                    logger.info("Telegram Webhook registered: %s", wh_res.json())
+            except Exception as e:
+                logger.warning("Could not auto-register Telegram webhook: %s", e)
+        else:
+            import asyncio
+            from app.integrations.telegram_bot import run_polling
+            logger.info("Starting Telegram Bot polling daemon in background...")
+            asyncio.create_task(run_polling())
+
     yield
 
     logger.info("Shutting down AIVA backend.")

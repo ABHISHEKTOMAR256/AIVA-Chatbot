@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     OLLAMA_TIMEOUT: int = 120
     OLLAMA_MAX_TOKENS: int = 2048
 
+    # ── Cloud LLM (Optional free cloud inference via Groq) ─────
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
     # ── Telegram ──────────────────────────────────────────────
     TELEGRAM_BOT_TOKEN: str = ""
     TELEGRAM_WEBHOOK_SECRET: str = ""

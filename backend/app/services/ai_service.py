@@ -99,6 +99,32 @@ class AIService:
         }
 
         start = time.perf_counter()
+
+        # 1. Try Groq Cloud LLM if API key is provided (blazing fast, 100% free tier)
+        if self.settings.GROQ_API_KEY:
+            try:
+                client = await self._get_client()
+                resp = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {self.settings.GROQ_API_KEY}"},
+                    json={
+                        "model": self.settings.GROQ_MODEL,
+                        "messages": messages,
+                        "temperature": 0.5,
+                        "max_tokens": 1024,
+                    },
+                    timeout=25.0,
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    content = data["choices"][0]["message"]["content"].strip()
+                    elapsed_ms = int((time.perf_counter() - start) * 1000)
+                    return content, elapsed_ms
+                logger.warning("Groq returned status %d: %s", resp.status_code, resp.text[:200])
+            except Exception as e:
+                logger.warning("Groq request failed, trying fallback: %s", e)
+
+        # 2. Try Local Ollama
         try:
             client = await self._get_client()
             resp = await client.post(
@@ -110,6 +136,10 @@ class AIService:
 
             if resp.status_code != 200:
                 logger.error("Ollama returned status %d: %s", resp.status_code, resp.text[:500])
+                from app.services.intent_service import IntentService
+                match = IntentService.get_instance().classify(user_message)
+                if match.suggested_response:
+                    return match.suggested_response, elapsed_ms
                 return (
                     "I'm sorry, I'm having trouble processing your request right now. "
                     "Please try again in a moment or type /human to speak with staff.",
@@ -125,6 +155,10 @@ class AIService:
         except httpx.TimeoutException:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
             logger.warning("Ollama request timed out after %d ms", elapsed_ms)
+            from app.services.intent_service import IntentService
+            match = IntentService.get_instance().classify(user_message)
+            if match.suggested_response:
+                return match.suggested_response, elapsed_ms
             return (
                 "I'm sorry, the request took too long. Please try a shorter question "
                 "or type /human to speak with staff.",
@@ -132,15 +166,20 @@ class AIService:
             )
         except httpx.ConnectError:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
-            logger.error("Cannot connect to Ollama at %s", self.settings.OLLAMA_BASE_URL)
+            logger.info("Local Ollama not reachable; using dataset matcher fallback.")
+            from app.services.intent_service import IntentService
+            match = IntentService.get_instance().classify(user_message)
+            if match.suggested_response:
+                return match.suggested_response, elapsed_ms
             return (
-                "The AI service is currently unavailable. Please type /human to speak "
-                "with hostel staff directly.",
+                "Hello! I am AIVA, your hostel assistant. I can help you register complaints, "
+                "track issue status, search lost & found items, and provide campus info. "
+                "Type /help for options or /human to connect with staff.",
                 elapsed_ms,
             )
         except Exception as exc:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
-            logger.exception("Unexpected error calling Ollama: %s", exc)
+            logger.exception("Unexpected error in AI service: %s", exc)
             return (
                 "An unexpected error occurred. Please try again or type /human for help.",
                 elapsed_ms,
