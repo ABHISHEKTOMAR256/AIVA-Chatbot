@@ -10,17 +10,26 @@ import {
   UserCredential,
 } from "firebase/auth";
 
-// Firebase Configuration from Environment Variables
+// Firebase Configuration from Environment Variables with project defaults
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDummyKeyForBuildOnly",
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyBYSJznulkKkeZIShS-s38WPVdn03Umnlk",
   authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "aiva-chatbot.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "aiva-chatbot",
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+    "aiva-chatbot-55b17.firebaseapp.com",
+  projectId:
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "aiva-chatbot-55b17",
   storageBucket:
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "aiva-chatbot.appspot.com",
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+    "aiva-chatbot-55b17.firebasestorage.app",
   messagingSenderId:
-    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "1234567890",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:1234567890:web:abcdef123456",
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "263379300082",
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+    "1:263379300082:web:5531fc332043a302bb2a6b",
+  measurementId:
+    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-L7HTRJ6Y0K",
 };
 
 // Initialize Singleton Firebase App
