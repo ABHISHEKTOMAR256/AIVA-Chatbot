@@ -28,24 +28,30 @@ from app.schemas.admin import (
     AdminConversationItem,
     AdminLoginRequest,
     AdminLoginResponse,
+    AdminMediaItem,
+    AdminSessionItem,
     AdminUserList,
     AdminUserResponse,
     BotHealthResponse,
     KnowledgeDocCreate,
     KnowledgeDocResponse,
+    ManualReplyRequest,
+    ModeUpdateRequest,
     TelegramDashboardStats,
     TelegramUserItem,
     TelegramUserListResponse,
 )
 from app.schemas.analytics import ConversationProgress, DailyStats, DashboardStats
 from app.schemas.auth import UserInfo
-from app.schemas.complaint import ComplaintListResponse, ComplaintResponse, ComplaintUpdate
+from app.schemas.complaint import ComplaintCreate, ComplaintListResponse, ComplaintResponse, ComplaintUpdate
 from app.schemas.handover import HandoverReply, HandoverResponse
+from app.schemas.lost_found import LostFoundCreate, LostFoundResponse
 from app.schemas.message import MessageResponse
 from app.services.admin_dashboard_service import AdminDashboardService
 from app.services.analytics_service import AnalyticsService
 from app.services.complaint_service import ComplaintService
 from app.services.handover_service import HandoverService
+from app.services.lost_found_service import LostFoundService
 from app.services.rag_service import RAGService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -518,4 +524,162 @@ async def get_bot_health_status(
 ) -> BotHealthResponse:
     """Live status of Telegram Bot, PostgreSQL DB latency, and Ollama/Groq inference."""
     return await AdminDashboardService.get_bot_status(db)
+
+
+@router.get("/guest/preview")
+async def get_guest_preview() -> Dict[str, Any]:
+    """Public non-sensitive preview metrics and sample data for Guest Mode.
+
+    Allows unauthenticated visitors to explore the 3D control room without accessing private records.
+    """
+    return AdminDashboardService.get_guest_preview_data()
+
+
+@router.post("/conversations/{conversation_id}/manual-reply")
+async def send_manual_reply(
+    conversation_id: UUID,
+    payload: ManualReplyRequest,
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    """Send manual reply directly from admin control center to Telegram/Web user."""
+    try:
+        return await AdminDashboardService.send_manual_reply(
+            db=db,
+            conversation_id=conversation_id,
+            content=payload.content,
+            admin_id=admin.id,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+@router.post("/conversations/{conversation_id}/mode")
+async def update_conversation_mode(
+    conversation_id: UUID,
+    payload: ModeUpdateRequest,
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    """Switch conversation handling mode between 'ai', 'human', and 'pending_handover'."""
+    try:
+        return await AdminDashboardService.update_conversation_mode(
+            db=db,
+            conversation_id=conversation_id,
+            mode=payload.mode,
+            admin_id=admin.id,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/media", response_model=Dict[str, Any])
+async def list_admin_media(
+    q: Optional[str] = Query(None),
+    file_type: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(30, ge=1, le=100),
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    """List all uploaded media files with signed URLs for authorized staff."""
+    files, total = await AdminDashboardService.get_admin_media_files(
+        db, q=q, file_type=file_type, page=page, page_size=page_size
+    )
+    return {"media": files, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/sessions", response_model=Dict[str, Any])
+async def list_admin_sessions(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=100),
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    """List all active conversation sessions and telemetry for the sessions monitor."""
+    sessions, total = await AdminDashboardService.get_admin_sessions(
+        db, page=page, page_size=page_size
+    )
+    return {"sessions": sessions, "total": total, "page": page, "page_size": page_size}
+
+
+@router.get("/lost-found", response_model=List[LostFoundResponse])
+async def list_admin_lost_found(
+    query: Optional[str] = Query(None),
+    item_type: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> List[LostFoundResponse]:
+    """Admin view for all lost & found items including private reporter details."""
+    items = await LostFoundService.search_items(
+        db, query=query, item_type=item_type, category=category, status=status
+    )
+    return [LostFoundResponse.model_validate(i) for i in items]
+
+
+@router.post("/lost-found", response_model=LostFoundResponse, status_code=status.HTTP_201_CREATED)
+async def create_admin_lost_found(
+    payload: LostFoundCreate,
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> LostFoundResponse:
+    """Admin manually logs a lost or found report."""
+    item = await LostFoundService.create_item(db, user_id=admin.id, data=payload)
+    await db.commit()
+    await db.refresh(item)
+    return LostFoundResponse.model_validate(item)
+
+
+@router.patch("/lost-found/{item_id}", response_model=LostFoundResponse)
+async def update_admin_lost_found_status(
+    item_id: UUID,
+    payload: dict,
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> LostFoundResponse:
+    """Admin updates status of a lost or found item (e.g. 'claimed', 'returned', 'resolved')."""
+    new_status = payload.get("status")
+    if not new_status:
+        raise HTTPException(status_code=400, detail="Status is required")
+
+    from app.models.lost_found_item import LostFoundItem
+    item = await db.get(LostFoundItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.status = new_status
+    if new_status in ("claimed", "returned", "resolved"):
+        item.resolved_at = datetime.now(timezone.utc)
+
+    # Log audit
+    audit = AdminAuditLog(
+        admin_id=admin.id,
+        action="update_lost_found_status",
+        target_id=str(item.id),
+        details={"new_status": new_status},
+    )
+    db.add(audit)
+    await db.commit()
+    await db.refresh(item)
+    return LostFoundResponse.model_validate(item)
+
+
+@router.post("/complaints", response_model=ComplaintResponse, status_code=status.HTTP_201_CREATED)
+async def create_admin_complaint(
+    payload: ComplaintCreate,
+    admin: UserInfo = Depends(get_current_admin),
+    db: AsyncSession = Depends(get_db),
+) -> ComplaintResponse:
+    """Admin manually creates a hostel complaint record."""
+    complaint = await ComplaintService().create_complaint(
+        db, user_id=admin.id, data=payload
+    )
+    await db.commit()
+    await db.refresh(complaint)
+    return ComplaintResponse.model_validate(complaint)
+
 

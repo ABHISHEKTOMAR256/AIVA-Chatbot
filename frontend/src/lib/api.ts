@@ -408,6 +408,10 @@ export async function getAdminProfile(): Promise<any> {
   return apiClient<any>("/api/admin/me");
 }
 
+export const getAdminMe = getAdminProfile;
+export const getAllComplaints = getAdminComplaints;
+export const updateComplaintStatus = updateComplaint;
+
 export async function getTelegramDashboardStats(): Promise<TelegramDashboardStats> {
   return apiClient<TelegramDashboardStats>("/api/admin/stats");
 }
@@ -511,3 +515,103 @@ export async function pollConversationMessages(
 export async function getBotHealthStatus(): Promise<BotHealthResponse> {
   return apiClient<BotHealthResponse>("/api/admin/bot/status");
 }
+
+export async function getGuestPreview(): Promise<any> {
+  return apiClient<any>("/api/admin/guest/preview");
+}
+
+export async function sendManualReply(
+  conversationId: string,
+  content: string
+): Promise<{ id: string; conversation_id: string; sender_type: string; content: string; telegram_sent: boolean }> {
+  return apiClient<{ id: string; conversation_id: string; sender_type: string; content: string; telegram_sent: boolean }>(
+    `/api/admin/conversations/${conversationId}/manual-reply`,
+    {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }
+  );
+}
+
+export async function updateConversationMode(
+  conversationId: string,
+  mode: string
+): Promise<{ conversation_id: string; handling_mode: string; message: string }> {
+  return apiClient<{ conversation_id: string; handling_mode: string; message: string }>(
+    `/api/admin/conversations/${conversationId}/mode`,
+    {
+      method: "POST",
+      body: JSON.stringify({ mode }),
+    }
+  );
+}
+
+export async function getAdminMedia(params: {
+  q?: string;
+  file_type?: string;
+  page?: number;
+  page_size?: number;
+} = {}): Promise<{ media: any[]; total: number; page: number; page_size: number }> {
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.file_type) search.set("file_type", params.file_type);
+  if (params.page) search.set("page", String(params.page));
+  if (params.page_size) search.set("page_size", String(params.page_size));
+
+  return apiClient<{ media: any[]; total: number; page: number; page_size: number }>(
+    `/api/admin/media?${search.toString()}`
+  );
+}
+
+export async function getAdminSessions(params: {
+  page?: number;
+  page_size?: number;
+} = {}): Promise<{ sessions: any[]; total: number; page: number; page_size: number }> {
+  const search = new URLSearchParams();
+  if (params.page) search.set("page", String(params.page));
+  if (params.page_size) search.set("page_size", String(params.page_size));
+
+  return apiClient<{ sessions: any[]; total: number; page: number; page_size: number }>(
+    `/api/admin/sessions?${search.toString()}`
+  );
+}
+
+export async function getAdminLostFound(params: {
+  query?: string;
+  item_type?: string;
+  category?: string;
+  status?: string;
+} = {}): Promise<LostFoundItem[]> {
+  const search = new URLSearchParams();
+  if (params.query) search.set("query", params.query);
+  if (params.item_type) search.set("item_type", params.item_type);
+  if (params.category) search.set("category", params.category);
+  if (params.status) search.set("status", params.status);
+
+  return apiClient<LostFoundItem[]>(`/api/admin/lost-found?${search.toString()}`);
+}
+
+export async function createAdminLostFound(data: any): Promise<LostFoundItem> {
+  return apiClient<LostFoundItem>("/api/admin/lost-found", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateAdminLostFoundStatus(
+  itemId: string,
+  status: string
+): Promise<LostFoundItem> {
+  return apiClient<LostFoundItem>(`/api/admin/lost-found/${itemId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function createAdminComplaint(data: any): Promise<Complaint> {
+  return apiClient<Complaint>("/api/admin/complaints", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+

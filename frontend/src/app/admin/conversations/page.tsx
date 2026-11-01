@@ -23,12 +23,16 @@ import {
   getLiveConversationDetail,
   pollConversationMessages,
   replyHandover,
+  sendManualReply,
 } from "@/lib/api";
+import { useGuestAuth } from "@/components/admin/GuestAuthContext";
 import type { AdminConversationItem, AdminConversationDetail } from "@/types";
 
 function LiveConversationsContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get("id");
+
+  const { isAdmin, isGuest, requireAuth } = useGuestAuth();
 
   const [conversations, setConversations] = useState<AdminConversationItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(initialId);
@@ -44,15 +48,44 @@ function LiveConversationsContent() {
   // 1. Fetch conversations list
   const loadConversations = async () => {
     try {
-      const res = await getLiveConversations({
-        q: search.trim() || undefined,
-        page_size: 50,
-      });
-      setConversations(res.conversations);
+      if (isAdmin) {
+        const res = await getLiveConversations({
+          q: search.trim() || undefined,
+          page_size: 50,
+        });
+        setConversations(res.conversations);
 
-      // Auto-select first conversation if none selected
-      if (!selectedId && res.conversations.length > 0) {
-        setSelectedId(res.conversations[0].id);
+        if (!selectedId && res.conversations.length > 0) {
+          setSelectedId(res.conversations[0].id);
+        }
+      } else {
+        // Guest Demo Conversations
+        const demoList: any[] = [
+          {
+            id: "demo-conv-1",
+            user_name: "Aman Sharma (Demo)",
+            telegram_username: "aman_s",
+            platform: "telegram",
+            status: "active",
+            handling_mode: "ai",
+            message_count: 4,
+            last_message_text: "Where can I report Wi-Fi router issues?",
+            created_at: new Date().toISOString(),
+          },
+          {
+            id: "demo-conv-2",
+            user_name: "Priya Patel (Demo)",
+            telegram_username: "priya_p",
+            platform: "telegram",
+            status: "active",
+            handling_mode: "human",
+            message_count: 8,
+            last_message_text: "Water leakage in Room 304, Block C.",
+            created_at: new Date().toISOString(),
+          },
+        ];
+        setConversations(demoList);
+        if (!selectedId) setSelectedId("demo-conv-1");
       }
     } catch (e) {
       console.error("Failed to load live conversations:", e);
@@ -63,33 +96,86 @@ function LiveConversationsContent() {
 
   useEffect(() => {
     loadConversations();
-    const interval = setInterval(loadConversations, 15000); // 15s refresh thread list
-    return () => clearInterval(interval);
-  }, [search]);
+    if (isAdmin) {
+      const interval = setInterval(loadConversations, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [search, isAdmin]);
 
   // 2. Fetch selected conversation detail
   useEffect(() => {
     if (!selectedId) return;
 
-    let isMounted = true;
-    setLoadingChat(true);
+    if (isAdmin) {
+      let isMounted = true;
+      setLoadingChat(true);
 
-    getLiveConversationDetail(selectedId)
-      .then((detail) => {
-        if (isMounted) {
-          setActiveDetail(detail);
-          setLoadingChat(false);
-        }
-      })
-      .catch((e) => {
-        console.error("Failed to load conversation detail:", e);
-        if (isMounted) setLoadingChat(false);
+      getLiveConversationDetail(selectedId)
+        .then((detail) => {
+          if (isMounted) {
+            setActiveDetail(detail);
+            setLoadingChat(false);
+          }
+        })
+        .catch((e) => {
+          console.error("Failed to load conversation detail:", e);
+          if (isMounted) setLoadingChat(false);
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    } else {
+      // Guest demo thread
+      setActiveDetail({
+        conversation: {
+          id: selectedId as any,
+          user_id: "demo-user" as any,
+          user_name: selectedId === "demo-conv-2" ? "Priya Patel (Demo)" : "Aman Sharma (Demo)",
+          telegram_username: selectedId === "demo-conv-2" ? "priya_p" : "aman_s",
+          platform: "telegram",
+          status: "active",
+          handling_mode: selectedId === "demo-conv-2" ? "human" : "ai",
+          message_count: 3,
+          created_at: new Date().toISOString() as any,
+        },
+        messages: [
+          {
+            id: "1",
+            sender_type: "user",
+            content: "Hello, I am asking about hostel complaint tracking.",
+            message_type: "text",
+            created_at: "10:14 AM",
+          },
+          {
+            id: "2",
+            sender_type: "ai",
+            content: "You can track complaint tickets with /status <REF-ID> anytime!",
+            message_type: "text",
+            created_at: "10:14 AM",
+          },
+          {
+            id: "3",
+            sender_type: "user",
+            content: "Got it, thank you!",
+            message_type: "text",
+            created_at: "10:15 AM",
+          },
+        ],
+        user_profile: {
+          id: "demo-user" as any,
+          full_name: selectedId === "demo-conv-2" ? "Priya Patel (Demo)" : "Aman Sharma (Demo)",
+          telegram_username: selectedId === "demo-conv-2" ? "priya_p" : "aman_s",
+          email: "student@telegram.local",
+          phone_number: "+91 98765 43210 (Guest Hidden)",
+          first_interaction: new Date() as any,
+          status: "active",
+          total_conversations: 2,
+          total_messages_sent: 5,
+        },
       });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedId]);
+    }
+  }, [selectedId, isAdmin]);
 
   // 3. Real-time message polling (every 3 seconds)
   useEffect(() => {
@@ -131,11 +217,15 @@ function LiveConversationsContent() {
   const handleStaffSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!staffReplyText.trim() || !selectedId || !activeDetail) return;
+    if (!requireAuth("Send manual reply directly to student")) return;
 
     setSendingReply(true);
     try {
-      // If handover is active or direct staff reply
-      await replyHandover(selectedId, staffReplyText.trim());
+      try {
+        await sendManualReply(selectedId, staffReplyText.trim());
+      } catch {
+        await replyHandover(selectedId, staffReplyText.trim());
+      }
 
       // Append optimistic message
       const optimisticMsg = {

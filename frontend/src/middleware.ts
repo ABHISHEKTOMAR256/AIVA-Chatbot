@@ -6,7 +6,6 @@ const protectedRoutes = [
   "/chat",
   "/complaints",
   "/lost-found",
-  "/admin",
 ];
 const publicRoutes = ["/", "/auth/callback", "/admin/login"];
 
@@ -15,6 +14,13 @@ export async function middleware(request: NextRequest) {
 
   // Allow public routes immediately
   if (publicRoutes.includes(pathname)) {
+    const { supabaseResponse } = await updateSession(request);
+    return supabaseResponse;
+  }
+
+  // Admin routes support Guest Preview Mode: guests can view layout, demo stats, sample data
+  // Protected actions inside admin invoke the GuestAuthModal.
+  if (pathname.startsWith("/admin")) {
     const { supabaseResponse } = await updateSession(request);
     return supabaseResponse;
   }
@@ -38,24 +44,9 @@ export async function middleware(request: NextRequest) {
 
   if (!isAuthenticated) {
     const url = request.nextUrl.clone();
-    if (pathname.startsWith("/admin")) {
-      url.pathname = "/admin/login";
-    } else {
-      url.pathname = "/";
-      url.searchParams.set("redirect", pathname);
-    }
+    url.pathname = "/";
+    url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
-  }
-
-  // Check admin route access
-  const isAdminPath = pathname.startsWith("/admin") && pathname !== "/admin/login";
-  if (isAdminPath) {
-    const isSupabaseAdmin = user?.user_metadata?.role === "admin";
-    if (!adminToken && !isSupabaseAdmin) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
-    }
   }
 
   return supabaseResponse;

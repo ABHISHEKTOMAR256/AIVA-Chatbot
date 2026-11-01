@@ -181,3 +181,51 @@ class KnowledgeDocResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ManualReplyRequest(BaseModel):
+    """Payload to send manual reply to conversation."""
+
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class ModeUpdateRequest(BaseModel):
+    """Payload to switch conversation handling mode."""
+
+    mode: str = Field(..., description="ai, human, or pending_handover")
+
+
+class AdminMediaItem(BaseModel):
+    """Media file detail for admin gallery."""
+
+    id: UUID
+    filename: str
+    stored_filename: str
+    mime_type: str
+    file_size: int
+    storage_path: str
+    bucket_name: str
+    signed_url: Optional[str] = None
+    user_id: UUID
+    user_name: Optional[str] = None
+    telegram_username: Optional[str] = None
+    complaint_id: Optional[UUID] = None
+    lost_found_item_id: Optional[UUID] = None
+    created_at: datetime
+
+
+class AdminSessionItem(BaseModel):
+    """Active session for administration."""
+
+    id: UUID
+    user_id: UUID
+    user_name: str
+    telegram_username: Optional[str] = None
+    telegram_id: Optional[int] = None
+    platform: str
+    status: str
+    handling_mode: str
+    message_count: int
+    created_at: datetime
+    updated_at: datetime
+

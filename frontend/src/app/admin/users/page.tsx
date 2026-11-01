@@ -24,9 +24,12 @@ import {
   getTelegramUserMessages,
   exportTelegramUsersCsv,
 } from "@/lib/api";
+import { useGuestAuth } from "@/components/admin/GuestAuthContext";
 import type { TelegramUserItem } from "@/types";
 
 export default function TelegramUsersPage() {
+  const { isAdmin, isGuest, requireAuth } = useGuestAuth();
+
   const [users, setUsers] = useState<TelegramUserItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -44,22 +47,81 @@ export default function TelegramUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const phoneParam =
-        hasPhoneFilter === "shared"
-          ? true
-          : hasPhoneFilter === "none"
-          ? false
-          : undefined;
+      if (isAdmin) {
+        const phoneParam =
+          hasPhoneFilter === "shared"
+            ? true
+            : hasPhoneFilter === "none"
+            ? false
+            : undefined;
 
-      const res = await getTelegramUsers({
-        q: search.trim() || undefined,
-        has_phone: phoneParam,
-        page,
-        page_size: pageSize,
-      });
+        const res = await getTelegramUsers({
+          q: search.trim() || undefined,
+          has_phone: phoneParam,
+          page,
+          page_size: pageSize,
+        });
 
-      setUsers(res.users);
-      setTotal(res.total);
+        setUsers(res.users);
+        setTotal(res.total);
+      } else {
+        // Guest Demo Directory
+        const demoUsers: TelegramUserItem[] = [
+          {
+            id: "demo-u-1" as any,
+            telegram_id: 99887711,
+            telegram_username: "aman_s",
+            first_name: "Aman",
+            last_name: "Sharma",
+            full_name: "Aman Sharma (Demo)",
+            email: "aman@telegram.local",
+            phone_number: "+91 98765 43210",
+            phone_shared_at: new Date() as any,
+            first_interaction: new Date() as any,
+            last_interaction: new Date() as any,
+            total_messages_sent: 8,
+            total_conversations: 2,
+            last_message_preview: "Where can I report Wi-Fi router issues?",
+            status: "active",
+          },
+          {
+            id: "demo-u-2" as any,
+            telegram_id: 88776622,
+            telegram_username: "priya_p",
+            first_name: "Priya",
+            last_name: "Patel",
+            full_name: "Priya Patel (Demo)",
+            email: "priya@telegram.local",
+            phone_number: undefined,
+            phone_shared_at: undefined,
+            first_interaction: new Date() as any,
+            last_interaction: new Date() as any,
+            total_messages_sent: 14,
+            total_conversations: 3,
+            last_message_preview: "Water leakage in Room 304, Block C.",
+            status: "active",
+          },
+          {
+            id: "demo-u-3" as any,
+            telegram_id: 77665533,
+            telegram_username: "vikram_sethi",
+            first_name: "Vikram",
+            last_name: "Sethi",
+            full_name: "Vikram Sethi (Demo)",
+            email: "vikram@telegram.local",
+            phone_number: "+91 91234 56789",
+            phone_shared_at: new Date() as any,
+            first_interaction: new Date() as any,
+            last_interaction: new Date() as any,
+            total_messages_sent: 5,
+            total_conversations: 1,
+            last_message_preview: "Thank you for fixing the study room lights!",
+            status: "active",
+          },
+        ];
+        setUsers(demoUsers);
+        setTotal(demoUsers.length);
+      }
     } catch (e) {
       console.error("Failed to load telegram users:", e);
     } finally {
@@ -69,7 +131,7 @@ export default function TelegramUsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, hasPhoneFilter]);
+  }, [page, hasPhoneFilter, isAdmin]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,13 +140,14 @@ export default function TelegramUsersPage() {
   };
 
   const handleExport = async () => {
+    if (!requireAuth("Export student records to CSV")) return;
     try {
       setExporting(true);
       const blob = await exportTelegramUsersCsv();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `aiva_telegram_students_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `alona_telegram_students_${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -96,6 +159,7 @@ export default function TelegramUsersPage() {
   };
 
   const openUserDrawer = async (user: TelegramUserItem) => {
+    if (!requireAuth("Inspect private student profile & contact details")) return;
     setSelectedUser(user);
     setLoadingMessages(true);
     try {

@@ -129,9 +129,11 @@ export interface DashboardStats {
 }
 
 export interface ConversationProgress {
-  total: number;
+  total?: number;
+  total_genuine?: number;
   target: number;
   percentage: number;
+  remaining?: number;
 }
 
 export interface MediaFile {

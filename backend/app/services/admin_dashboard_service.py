@@ -18,11 +18,14 @@ from app.core.logging_config import get_logger
 from app.models.analytics_event import AnalyticsEvent
 from app.models.audit_log import AdminAuditLog
 from app.models.conversation import Conversation
+from app.models.media_file import MediaFile
 from app.models.message import Message
 from app.models.profile import Profile
 from app.schemas.admin import (
     AdminConversationDetail,
     AdminConversationItem,
+    AdminMediaItem,
+    AdminSessionItem,
     BotHealthResponse,
     TelegramDashboardStats,
     TelegramUserItem,
@@ -603,3 +606,323 @@ class AdminDashboardService:
             ])
 
         return output.getvalue().encode("utf-8")
+
+    @staticmethod
+    async def send_manual_reply(
+        db: AsyncSession,
+        conversation_id: UUID,
+        content: str,
+        admin_id: UUID,
+    ) -> Dict[str, Any]:
+        """Send a real-time manual administrative reply to a user."""
+        stmt = select(Conversation).where(Conversation.id == conversation_id)
+        res = await db.execute(stmt)
+        conv = res.scalar_one_or_none()
+        if not conv:
+            raise ValueError("Conversation not found")
+
+        telegram_sent = False
+        telegram_error = None
+
+        if conv.platform == "telegram" and conv.platform_conversation_id:
+            try:
+                from app.integrations.telegram_bot import TelegramBot
+                bot = TelegramBot(db)
+                chat_id = int(conv.platform_conversation_id)
+                telegram_sent = await bot.send_message(
+                    chat_id=chat_id,
+                    text=f"👨‍💼 *Hostel Administration:*\n{content}",
+                )
+                if not telegram_sent:
+                    telegram_error = "Telegram API rejected message delivery"
+            except Exception as e:
+                logger.error("Failed to send Telegram manual reply: %s", e)
+                telegram_sent = False
+                telegram_error = str(e)
+
+        # Save outgoing message in DB
+        status_val = "processed" if (conv.platform != "telegram" or telegram_sent) else "failed"
+        msg = Message(
+            conversation_id=conv.id,
+            sender_type="staff",
+            content=content,
+            message_type="text",
+            processing_status=status_val,
+        )
+        db.add(msg)
+        conv.message_count += 1
+        conv.updated_at = datetime.now(timezone.utc)
+
+        # Audit log
+        audit = AdminAuditLog(
+            admin_id=admin_id,
+            action="manual_reply",
+            target_id=str(conv.id),
+            details={"content": content[:100], "telegram_sent": telegram_sent, "error": telegram_error},
+        )
+        db.add(audit)
+        await db.commit()
+        await db.refresh(msg)
+
+        if conv.platform == "telegram" and not telegram_sent:
+            raise RuntimeError(f"Message could not be delivered to Telegram: {telegram_error or 'Network failure'}")
+
+        return {
+            "id": str(msg.id),
+            "conversation_id": str(msg.conversation_id),
+            "sender_type": msg.sender_type,
+            "content": msg.content,
+            "processing_status": msg.processing_status,
+            "created_at": msg.created_at.isoformat(),
+            "telegram_sent": telegram_sent,
+        }
+
+    @staticmethod
+    async def update_conversation_mode(
+        db: AsyncSession,
+        conversation_id: UUID,
+        mode: str,
+        admin_id: UUID,
+    ) -> Dict[str, Any]:
+        """Update conversation handling mode (ai | human | pending_handover)."""
+        if mode not in ("ai", "human", "pending_handover"):
+            raise ValueError("Invalid handling mode")
+
+        stmt = select(Conversation).where(Conversation.id == conversation_id)
+        res = await db.execute(stmt)
+        conv = res.scalar_one_or_none()
+        if not conv:
+            raise ValueError("Conversation not found")
+
+        old_mode = conv.handling_mode
+        conv.handling_mode = mode
+        if mode == "human":
+            conv.assigned_staff_id = admin_id
+        elif mode == "ai":
+            conv.assigned_staff_id = None
+
+        # System message in thread
+        sys_msg = Message(
+            conversation_id=conv.id,
+            sender_type="system",
+            content=f"⚙️ Conversation mode switched from {old_mode} to {mode} by staff.",
+            message_type="system",
+        )
+        db.add(sys_msg)
+
+        audit = AdminAuditLog(
+            admin_id=admin_id,
+            action="update_conversation_mode",
+            target_id=str(conv.id),
+            details={"old_mode": old_mode, "new_mode": mode},
+        )
+        db.add(audit)
+        await db.commit()
+
+        return {
+            "conversation_id": str(conv.id),
+            "handling_mode": conv.handling_mode,
+            "assigned_staff_id": str(conv.assigned_staff_id) if conv.assigned_staff_id else None,
+            "message": f"Handling mode updated to {mode}",
+        }
+
+    @staticmethod
+    async def get_admin_media_files(
+        db: AsyncSession,
+        q: Optional[str] = None,
+        file_type: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 30,
+    ) -> Tuple[List[AdminMediaItem], int]:
+        """Retrieve all media files with signed URLs for authorized staff."""
+        from app.services.media_service import MediaService
+
+        base_query = (
+            select(MediaFile, Profile)
+            .join(Profile, MediaFile.user_id == Profile.id)
+        )
+
+        if q:
+            base_query = base_query.where(
+                or_(
+                    MediaFile.filename.ilike(f"%{q}%"),
+                    Profile.full_name.ilike(f"%{q}%"),
+                    Profile.telegram_username.ilike(f"%{q}%"),
+                )
+            )
+
+        if file_type:
+            base_query = base_query.where(MediaFile.mime_type.ilike(f"%{file_type}%"))
+
+        total_stmt = select(func.count()).select_from(base_query.subquery())
+        total = await db.scalar(total_stmt) or 0
+
+        stmt = (
+            base_query
+            .order_by(desc(MediaFile.created_at))
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        res = await db.execute(stmt)
+        rows = res.all()
+
+        items: List[AdminMediaItem] = []
+        for media, prof in rows:
+            signed_url = None
+            try:
+                signed_url = await MediaService.get_file_url(
+                    db, file_id=media.id, user_id=prof.id, is_admin=True
+                )
+            except Exception:
+                signed_url = None
+
+            items.append(
+                AdminMediaItem(
+                    id=media.id,
+                    filename=media.filename,
+                    stored_filename=media.stored_filename,
+                    mime_type=media.mime_type,
+                    file_size=media.file_size,
+                    storage_path=media.storage_path,
+                    bucket_name=media.bucket_name,
+                    signed_url=signed_url,
+                    user_id=prof.id,
+                    user_name=prof.full_name or prof.telegram_username or "User",
+                    telegram_username=prof.telegram_username,
+                    complaint_id=media.complaint_id,
+                    lost_found_item_id=media.lost_found_item_id,
+                    created_at=media.created_at,
+                )
+            )
+
+        return items, int(total)
+
+    @staticmethod
+    async def get_admin_sessions(
+        db: AsyncSession,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> Tuple[List[AdminSessionItem], int]:
+        """List active conversation sessions with timing telemetry."""
+        base_query = (
+            select(Conversation, Profile)
+            .join(Profile, Conversation.user_id == Profile.id)
+        )
+
+        total_stmt = select(func.count()).select_from(base_query.subquery())
+        total = await db.scalar(total_stmt) or 0
+
+        stmt = (
+            base_query
+            .order_by(desc(Conversation.updated_at))
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        res = await db.execute(stmt)
+        rows = res.all()
+
+        items: List[AdminSessionItem] = []
+        for conv, prof in rows:
+            items.append(
+                AdminSessionItem(
+                    id=conv.id,
+                    user_id=prof.id,
+                    user_name=prof.full_name or prof.telegram_username or "User",
+                    telegram_username=prof.telegram_username,
+                    telegram_id=prof.telegram_id,
+                    platform=conv.platform,
+                    status=conv.status,
+                    handling_mode=conv.handling_mode,
+                    message_count=conv.message_count,
+                    created_at=conv.created_at,
+                    updated_at=conv.updated_at,
+                )
+            )
+
+        return items, int(total)
+
+    @staticmethod
+    def get_guest_preview_data() -> Dict[str, Any]:
+        """Safe non-sensitive public demonstration data for Guest Mode."""
+        return {
+            "mode": "guest_preview",
+            "badge": "Guest Demonstration Preview",
+            "stats": {
+                "total_telegram_users": 142,
+                "total_conversations": 318,
+                "total_messages_received": 1420,
+                "total_bot_replies": 1395,
+                "active_users_today": 28,
+                "active_users_7d": 89,
+                "avg_response_time_ms": 320.5,
+                "failed_messages": 0,
+                "bot_online": True,
+                "bot_username": "AIVA_LPU_bot",
+            },
+            "academic_progress": {
+                "total_genuine": 22,
+                "target": 25,
+                "percentage": 88.0,
+                "remaining": 3,
+                "note": "Demonstration view — Authenticate to inspect live database audit logs.",
+            },
+            "sample_conversations": [
+                {
+                    "id": "demo-conv-1",
+                    "user_name": "Demo Student Alpha",
+                    "telegram_username": "student_alpha",
+                    "title": "Wi-Fi outage in Block B",
+                    "platform": "telegram",
+                    "handling_mode": "ai",
+                    "status": "active",
+                    "message_count": 6,
+                    "last_message_text": "Wi-Fi in 3rd floor Block B is working now, thanks!",
+                    "time_ago": "12m ago",
+                },
+                {
+                    "id": "demo-conv-2",
+                    "user_name": "Demo Student Beta",
+                    "telegram_username": "beta_hosteler",
+                    "title": "Water cooler maintenance",
+                    "platform": "telegram",
+                    "handling_mode": "human",
+                    "status": "active",
+                    "message_count": 14,
+                    "last_message_text": "Plumber scheduled for 4:00 PM today.",
+                    "time_ago": "45m ago",
+                },
+                {
+                    "id": "demo-conv-3",
+                    "user_name": "Demo Resident Gamma",
+                    "telegram_username": "gamma_res",
+                    "title": "Lost blue water bottle",
+                    "platform": "telegram",
+                    "handling_mode": "ai",
+                    "status": "closed",
+                    "message_count": 4,
+                    "last_message_text": "Item found at Central Library reception.",
+                    "time_ago": "2h ago",
+                },
+            ],
+            "sample_media": [
+                {
+                    "id": "demo-img-1",
+                    "filename": "water_leak_pipe.jpg",
+                    "mime_type": "image/jpeg",
+                    "file_size": 245000,
+                    "user_name": "Resident Demo",
+                    "tag": "Hostel Complaint #E-102",
+                    "created_at": "Today, 10:15 AM",
+                },
+                {
+                    "id": "demo-img-2",
+                    "filename": "blue_keys_found.png",
+                    "mime_type": "image/png",
+                    "file_size": 185000,
+                    "user_name": "Hostel Guard Demo",
+                    "tag": "Lost & Found #LF-409",
+                    "created_at": "Yesterday, 3:30 PM",
+                },
+            ],
+        }
+

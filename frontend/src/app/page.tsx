@@ -73,6 +73,14 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/admin"
+            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#0b0f19] text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.15)] transition-all font-mono"
+          >
+            <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            3D Control Center
+          </Link>
+
           <a
             href={`https://t.me/${telegramBotUser}`}
             target="_blank"
@@ -159,6 +167,14 @@ export default function LandingPage() {
             <Send className="w-4 h-4" />
             Chat on Telegram
           </a>
+
+          <Link
+            href="/admin"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-950 text-cyan-300 border border-cyan-500/40 hover:border-cyan-400 font-semibold text-sm shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_25px_rgba(0,240,255,0.35)] transition-all font-mono"
+          >
+            <Shield className="w-4 h-4 text-cyan-400" />
+            3D Admin Center (Guest Mode)
+          </Link>
         </div>
 
         {/* Feature Cards Grid */}
