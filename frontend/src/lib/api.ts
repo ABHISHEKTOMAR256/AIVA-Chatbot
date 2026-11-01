@@ -11,6 +11,13 @@ import type {
   KnowledgeDoc,
   ConversationProgress,
   MediaFile,
+  TelegramDashboardStats,
+  TelegramUserItem,
+  TelegramUserListResponse,
+  AdminConversationItem,
+  AdminConversationDetail,
+  BotHealthResponse,
+  AdminLoginResponse,
 } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -38,14 +45,19 @@ async function apiClient<T>(
     ...(options.headers || {}),
   };
 
-  if (session?.access_token) {
-    (headers as Record<string, string>)["Authorization"] =
-      `Bearer ${session.access_token}`;
+  let token = session?.access_token;
+  if (!token && typeof window !== "undefined") {
+    token = localStorage.getItem("aiva_admin_token") || undefined;
+  }
+
+  if (token) {
+    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -359,4 +371,140 @@ export async function deleteKnowledgeDoc(id: string): Promise<void> {
   return apiClient<void>(`/api/admin/knowledge/${id}`, {
     method: "DELETE",
   });
+}
+
+// ── 3D Futuristic Admin Dashboard APIs ───────────────────────────────────────
+
+export async function adminLogin(
+  username_or_email: string,
+  password: string
+): Promise<AdminLoginResponse> {
+  const res = await apiClient<AdminLoginResponse>("/api/admin/login", {
+    method: "POST",
+    body: JSON.stringify({ username_or_email, password }),
+  });
+  if (typeof window !== "undefined" && res.access_token) {
+    localStorage.setItem("aiva_admin_token", res.access_token);
+    localStorage.setItem("aiva_admin_user", JSON.stringify(res.user));
+  }
+  return res;
+}
+
+export async function adminLogout(): Promise<void> {
+  try {
+    await apiClient<void>("/api/admin/logout", { method: "POST" });
+  } finally {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("aiva_admin_token");
+      localStorage.removeItem("aiva_admin_user");
+    }
+  }
+}
+
+export async function getAdminProfile(): Promise<any> {
+  return apiClient<any>("/api/admin/me");
+}
+
+export async function getTelegramDashboardStats(): Promise<TelegramDashboardStats> {
+  return apiClient<TelegramDashboardStats>("/api/admin/stats");
+}
+
+export async function getAnalyticsCharts(
+  days: number = 14
+): Promise<{ timeline: Array<any> }> {
+  return apiClient<{ timeline: Array<any> }>(
+    `/api/admin/analytics/charts?days=${days}`
+  );
+}
+
+export async function getTelegramUsers(params: {
+  q?: string;
+  has_phone?: boolean;
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<TelegramUserListResponse> {
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.has_phone !== undefined) search.set("has_phone", String(params.has_phone));
+  if (params.status) search.set("status", params.status);
+  if (params.page) search.set("page", String(params.page));
+  if (params.page_size) search.set("page_size", String(params.page_size));
+
+  return apiClient<TelegramUserListResponse>(
+    `/api/admin/telegram/users?${search.toString()}`
+  );
+}
+
+export async function getTelegramUserDetail(
+  userId: string
+): Promise<TelegramUserItem> {
+  return apiClient<TelegramUserItem>(`/api/admin/telegram/users/${userId}`);
+}
+
+export async function getTelegramUserMessages(
+  userId: string,
+  limit: number = 100
+): Promise<Array<any>> {
+  return apiClient<Array<any>>(
+    `/api/admin/telegram/users/${userId}/messages?limit=${limit}`
+  );
+}
+
+export async function exportTelegramUsersCsv(): Promise<Blob> {
+  let token: string | undefined;
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("aiva_admin_token") || undefined;
+  }
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/admin/telegram/users/export/csv`, {
+    headers,
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new ApiError("Failed to export Telegram users CSV", response.status);
+  }
+  return response.blob();
+}
+
+export async function getLiveConversations(params: {
+  q?: string;
+  status?: string;
+  handling_mode?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<{ conversations: AdminConversationItem[]; total: number; page: number; page_size: number }> {
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.status) search.set("status", params.status);
+  if (params.handling_mode) search.set("handling_mode", params.handling_mode);
+  if (params.page) search.set("page", String(params.page));
+  if (params.page_size) search.set("page_size", String(params.page_size));
+
+  return apiClient<any>(`/api/admin/live/conversations?${search.toString()}`);
+}
+
+export async function getLiveConversationDetail(
+  conversationId: string
+): Promise<AdminConversationDetail> {
+  return apiClient<AdminConversationDetail>(
+    `/api/admin/live/conversations/${conversationId}`
+  );
+}
+
+export async function pollConversationMessages(
+  conversationId: string,
+  since: string
+): Promise<{ messages: Array<any> }> {
+  return apiClient<{ messages: Array<any> }>(
+    `/api/admin/live/conversations/${conversationId}/poll?since=${encodeURIComponent(since)}`
+  );
+}
+
+export async function getBotHealthStatus(): Promise<BotHealthResponse> {
+  return apiClient<BotHealthResponse>("/api/admin/bot/status");
 }

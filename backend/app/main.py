@@ -55,7 +55,8 @@ async def lifespan(app: FastAPI):
 
     # 3. Automatic Telegram Bot Dispatch (Polling or Webhook)
     if settings.TELEGRAM_BOT_TOKEN and not settings.TELEGRAM_BOT_TOKEN.startswith("dummy"):
-        if settings.TELEGRAM_WEBHOOK_URL:
+        # Webhook requires a valid public HTTPS domain; otherwise fall back to polling
+        if settings.TELEGRAM_WEBHOOK_URL and settings.TELEGRAM_WEBHOOK_URL.startswith("https://"):
             try:
                 setup_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
                 payload = {

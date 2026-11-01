@@ -92,6 +92,8 @@ class TelegramBot:
             profile = Profile(
                 email=f"tg_{tg_id}@telegram.local",
                 full_name=full_name,
+                first_name=first_name,
+                last_name=last_name,
                 telegram_id=tg_id,
                 telegram_username=tg_username,
                 role="user",
@@ -99,6 +101,13 @@ class TelegramBot:
             )
             self.db.add(profile)
             await self.db.flush()
+        else:
+            if first_name and not profile.first_name:
+                profile.first_name = first_name
+            if last_name and not profile.last_name:
+                profile.last_name = last_name
+            if tg_username and profile.telegram_username != tg_username:
+                profile.telegram_username = tg_username
         return profile
 
     async def process_update(self, update: dict) -> None:
@@ -113,6 +122,7 @@ class TelegramBot:
         tg_user_id = user.get("id")
         text = message.get("text", "").strip()
         photo = message.get("photo")
+        contact = message.get("contact")
         msg_id = message.get("message_id")
 
         if not chat_id or not tg_user_id:
@@ -135,6 +145,11 @@ class TelegramBot:
         )
         if existing_msg.scalar_one_or_none():
             logger.info("Ignoring duplicate Telegram message %s", msg_id)
+            return
+
+        # If contact was shared
+        if contact:
+            await self._handle_contact_message(chat_id, profile, conversation, contact, msg_id)
             return
 
         # Record incoming message in DB
@@ -195,6 +210,7 @@ class TelegramBot:
                 "• `/complaint` — Register a hostel issue\n"
                 "• `/status [ref]` — Track your complaint status\n"
                 "• `/lost` — Report lost or found items\n"
+                "• `/contact` — Share your contact number for urgent alerts\n"
                 "• `/human` — Connect with hostel warden/staff\n"
                 "• `/link <code>` — Link this Telegram to your web account\n"
                 "• `/cancel` — Cancel active action\n\n"
@@ -202,6 +218,25 @@ class TelegramBot:
             )
             await self.send_message(chat_id, welcome)
             await conv_service.add_message(self.db, conversation_id=conversation.id, sender_type="ai", content=welcome)
+
+        elif command == "/contact":
+            contact_msg = (
+                "📱 *Share Contact with Hostel Administration*\n\n"
+                "Sharing your phone number helps the warden, maintenance staff, and medical team reach you swiftly for emergency updates or resolved complaints.\n\n"
+                "• *Privacy:* Your contact is encrypted and strictly accessible by authorized staff.\n"
+                "• *Optional:* You can decline anytime by typing `/cancel`.\n\n"
+                "Tap the button below to share:"
+            )
+            markup = {
+                "keyboard": [
+                    [{"text": "📱 Share Contact Number", "request_contact": True}],
+                    [{"text": "❌ Cancel"}],
+                ],
+                "resize_keyboard": True,
+                "one_time_keyboard": True,
+            }
+            await self.send_message(chat_id, contact_msg, reply_markup=markup)
+            await conv_service.add_message(self.db, conversation_id=conversation.id, sender_type="ai", content=contact_msg)
 
         elif command == "/complaint":
             _user_states[profile.telegram_id] = {"state": "waiting_complaint_category", "data": {}}
@@ -524,6 +559,57 @@ class TelegramBot:
             "📷 Photo received and attached to your conversation records. If this relates to an issue, please file a complaint using `/complaint`.",
         )
 
+    async def _handle_contact_message(
+        self,
+        chat_id: int,
+        profile: Profile,
+        conversation: Conversation,
+        contact: dict,
+        msg_id: int,
+    ) -> None:
+        """Handle contact card shared via Telegram request_contact button."""
+        conv_service = ConversationService()
+        tg_user_id = profile.telegram_id
+        contact_user_id = contact.get("user_id")
+
+        # Security check: Ensure the contact card matches the sender's account
+        if contact_user_id and contact_user_id != tg_user_id:
+            reply = "⚠️ The shared contact does not match your Telegram account. Please share your own contact."
+            await self.send_message(chat_id, reply, reply_markup={"remove_keyboard": True})
+            return
+
+        raw_phone = str(contact.get("phone_number", "")).strip()
+        if not raw_phone:
+            return
+
+        # Normalize phone number with country code
+        phone = raw_phone if raw_phone.startswith("+") else f"+{raw_phone}"
+
+        profile.phone_number = phone
+        profile.phone_shared_at = datetime.now(timezone.utc)
+        if contact.get("first_name"):
+            profile.first_name = contact.get("first_name")
+        if contact.get("last_name"):
+            profile.last_name = contact.get("last_name")
+
+        # Record contact message in conversation
+        await conv_service.add_message(
+            self.db,
+            conversation_id=conversation.id,
+            sender_type="user",
+            content=f"📱 Shared contact number: {phone}",
+            message_type="contact",
+            telegram_message_id=msg_id,
+        )
+
+        success_msg = (
+            "✅ *Contact Verified & Linked Successfully!*\n\n"
+            f"Your phone number (`{phone}`) has been safely recorded on your student profile. "
+            "Hostel administration and maintenance staff will use this for urgent notifications and visit coordination."
+        )
+        await self.send_message(chat_id, success_msg, reply_markup={"remove_keyboard": True})
+        await conv_service.add_message(self.db, conversation_id=conversation.id, sender_type="ai", content=success_msg)
+
 
 async def _process_single_update(update: dict) -> None:
     """Process one update with an isolated DB session so errors don't stop the loop."""
@@ -576,8 +662,8 @@ async def run_polling() -> None:
                         offset = update["update_id"] + 1
                         asyncio.create_task(_process_single_update(update))
                 elif resp.status_code == 409:
-                    logger.warning("Conflict with webhook or another bot instance. Waiting 5s...")
-                    await asyncio.sleep(5)
+                    logger.warning("Conflict with webhook or another bot instance: %s. Retrying in 3s...", resp.text)
+                    await asyncio.sleep(3)
             except asyncio.CancelledError:
                 break
             except Exception as e:

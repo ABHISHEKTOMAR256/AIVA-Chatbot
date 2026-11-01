@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import secrets
 import string
+import time
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Dict, List, Optional
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, Header, status
+import bcrypt
+import jwt
+from fastapi import Depends, HTTPException, Header, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,43 +24,117 @@ from app.schemas.auth import UserInfo
 logger = get_logger("app")
 security_scheme = HTTPBearer(auto_error=False)
 
+# In-memory sliding window rate limiter for admin authentication
+_login_attempts: Dict[str, List[float]] = {}
+
+
+def check_login_rate_limit(ip_address: str, max_attempts: int = 5, window_seconds: int = 600) -> bool:
+    """Sliding-window IP rate limiter to protect admin login endpoints."""
+    now = time.time()
+    attempts = _login_attempts.get(ip_address, [])
+    valid_attempts = [t for t in attempts if now - t < window_seconds]
+    _login_attempts[ip_address] = valid_attempts
+    return len(valid_attempts) < max_attempts
+
+
+def record_login_failure(ip_address: str) -> None:
+    """Record a failed login attempt for rate limiting."""
+    now = time.time()
+    if ip_address not in _login_attempts:
+        _login_attempts[ip_address] = []
+    _login_attempts[ip_address].append(now)
+
+
+def reset_login_attempts(ip_address: str) -> None:
+    """Clear failed login attempts on successful login."""
+    _login_attempts.pop(ip_address, None)
+
+
+def hash_password(password: str) -> str:
+    """Hash password with bcrypt using 12 salt rounds."""
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: Optional[str]) -> bool:
+    """Verify plain password against stored bcrypt hash."""
+    if not hashed_password:
+        return False
+    try:
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+    except Exception:
+        return False
+
+
+def create_admin_access_token(
+    user_id: UUID,
+    role: str,
+    email: str,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """Issue a signed JWT session token for authenticated administrators."""
+    settings = get_settings()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=12))
+    payload = {
+        "sub": str(user_id),
+        "email": email,
+        "role": role,
+        "exp": expire,
+        "iat": datetime.now(timezone.utc),
+        "iss": "aiva-admin",
+    }
+    return jwt.encode(payload, settings.APP_SECRET_KEY, algorithm="HS256")
+
 
 async def _resolve_supabase_user(token: str) -> dict:
-    """Verify a Supabase JWT and return the user payload.
-
-    Uses the Supabase GoTrue REST endpoint so we always validate
-    against the live session (respects logout / revocation).
-    """
+    """Verify a Supabase JWT and return the user payload."""
     from app.integrations.supabase_client import verify_supabase_token
 
     return await verify_supabase_token(token)
 
 
 async def get_current_user(
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> UserInfo:
-    """FastAPI dependency — authenticate via Supabase JWT and return UserInfo."""
-    if credentials is None:
+    """FastAPI dependency — authenticate via admin JWT (Bearer or Cookie) or Supabase JWT."""
+    token: Optional[str] = None
+    if credentials:
+        token = credentials.credentials
+    else:
+        # Check HTTP-only cookie
+        token = request.cookies.get("aiva_admin_token")
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing authentication token",
+            detail="Missing authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = credentials.credentials
+    settings = get_settings()
+    user_id = None
+    email = ""
+
+    # 1. Try decoding as local signed Admin JWT
     try:
-        user_payload = await _resolve_supabase_user(token)
+        payload = jwt.decode(token, settings.APP_SECRET_KEY, algorithms=["HS256"], issuer="aiva-admin")
+        user_id = payload.get("sub")
+        email = payload.get("email", "")
     except Exception:
-        logger.warning("Token verification failed")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    user_id = user_payload.get("sub") or user_payload.get("id")
-    email = user_payload.get("email", "")
+        # 2. Fall back to Supabase OAuth JWT
+        try:
+            user_payload = await _resolve_supabase_user(token)
+            user_id = user_payload.get("sub") or user_payload.get("id")
+            email = user_payload.get("email", "")
+        except Exception:
+            logger.warning("Token verification failed")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired session token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     if not user_id:
         raise HTTPException(
@@ -65,7 +142,7 @@ async def get_current_user(
             detail="Invalid token payload",
         )
 
-    # Fetch or create the profile
+    # Fetch profile from database
     from app.models.profile import Profile
 
     stmt = select(Profile).where(Profile.id == UUID(str(user_id)))
@@ -73,11 +150,9 @@ async def get_current_user(
     profile = result.scalar_one_or_none()
 
     if profile is None:
-        # First login — create a profile row
         profile = Profile(
             id=UUID(str(user_id)),
             email=email,
-            full_name=user_payload.get("user_metadata", {}).get("full_name"),
             role="user",
             is_active=True,
         )
@@ -93,7 +168,7 @@ async def get_current_user(
     return UserInfo(
         id=profile.id,
         email=profile.email,
-        full_name=profile.full_name,
+        full_name=profile.full_name or profile.email.split("@")[0],
         role=profile.role,
         avatar_url=profile.avatar_url,
     )

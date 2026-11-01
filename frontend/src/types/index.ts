@@ -171,3 +171,102 @@ export interface AnalyticsExport {
   url: string;
   filename: string;
 }
+
+// ── 3D Control Center Admin Types ───────────────────────────────────────
+
+export interface TelegramDashboardStats {
+  total_telegram_users: number;
+  total_conversations: number;
+  total_messages_received: number;
+  total_bot_replies: number;
+  active_users_today: number;
+  active_users_7d: number;
+  avg_response_time_ms: number;
+  failed_messages: number;
+  bot_online: boolean;
+  bot_username: string;
+  uptime_seconds?: number;
+}
+
+export interface TelegramUserItem {
+  id: string;
+  telegram_id?: number;
+  telegram_username?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  email: string;
+  phone_number?: string;
+  phone_shared_at?: string;
+  first_interaction: string;
+  last_interaction?: string;
+  total_messages_sent: number;
+  total_conversations: number;
+  last_message_preview?: string;
+  status: "active" | "inactive";
+}
+
+export interface TelegramUserListResponse {
+  users: TelegramUserItem[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface AdminConversationItem {
+  id: string;
+  user_id: string;
+  user_name?: string;
+  telegram_username?: string;
+  telegram_id?: number;
+  phone_number?: string;
+  platform: string;
+  platform_conversation_id?: string;
+  title?: string;
+  status: string;
+  handling_mode: string;
+  message_count: number;
+  last_message_text?: string;
+  last_message_time?: string;
+  created_at: string;
+}
+
+export interface AdminConversationDetail {
+  conversation: AdminConversationItem;
+  messages: Array<{
+    id: string;
+    sender_type: "user" | "ai" | "system" | "staff";
+    content: string;
+    message_type: string;
+    processing_status?: string;
+    response_time_ms?: number;
+    created_at: string;
+  }>;
+  user_profile: TelegramUserItem;
+}
+
+export interface BotHealthResponse {
+  bot_name: string;
+  bot_username: string;
+  bot_status: string;
+  api_status: string;
+  database_status: string;
+  database_latency_ms: number;
+  model_provider: string;
+  model_name: string;
+  last_message_at?: string;
+  recent_errors_count: number;
+  ollama_available: boolean;
+  installed_models: string[];
+}
+
+export interface AdminLoginResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    id: string;
+    email: string;
+    full_name?: string;
+    role: string;
+  };
+}

@@ -28,6 +28,13 @@ class Profile(BaseModel):
     full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="user")
+    password_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    first_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    last_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    phone_shared_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     telegram_id: Mapped[Optional[int]] = mapped_column(
         BigInteger, nullable=True, unique=True
     )

@@ -11,3 +11,4 @@ from app.models.feedback import Feedback  # noqa: F401
 from app.models.analytics_event import AnalyticsEvent  # noqa: F401
 from app.models.lost_found_item import LostFoundItem  # noqa: F401
 from app.models.knowledge_document import KnowledgeDocument  # noqa: F401
+from app.models.audit_log import AdminAuditLog  # noqa: F401

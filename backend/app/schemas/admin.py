@@ -15,6 +15,10 @@ class AdminUserResponse(BaseModel):
     id: UUID
     email: str
     full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    phone_shared_at: Optional[datetime] = None
     role: str
     is_active: bool
     telegram_id: Optional[int] = None
@@ -22,6 +26,111 @@ class AdminUserResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class AdminLoginRequest(BaseModel):
+    """Admin login credentials."""
+
+    username_or_email: str = Field(..., min_length=3)
+    password: str = Field(..., min_length=6)
+
+
+class AdminLoginResponse(BaseModel):
+    """Admin authentication reply."""
+
+    access_token: str
+    token_type: str = "bearer"
+    user: AdminUserResponse
+
+
+class TelegramDashboardStats(BaseModel):
+    """High-level real-time KPI metrics for the 3D dashboard."""
+
+    total_telegram_users: int
+    total_conversations: int
+    total_messages_received: int
+    total_bot_replies: int
+    active_users_today: int
+    active_users_7d: int
+    avg_response_time_ms: float
+    failed_messages: int
+    bot_online: bool
+    bot_username: str
+    uptime_seconds: Optional[int] = None
+
+
+class TelegramUserItem(BaseModel):
+    """Rich Telegram user details for administration."""
+
+    id: UUID
+    telegram_id: Optional[int] = None
+    telegram_username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    full_name: Optional[str] = None
+    email: str
+    phone_number: Optional[str] = None
+    phone_shared_at: Optional[datetime] = None
+    first_interaction: datetime
+    last_interaction: Optional[datetime] = None
+    total_messages_sent: int = 0
+    total_conversations: int = 0
+    last_message_preview: Optional[str] = None
+    status: str = "active"
+
+
+class TelegramUserListResponse(BaseModel):
+    """Paginated users list."""
+
+    users: List[TelegramUserItem]
+    total: int
+    page: int = 1
+    page_size: int = 20
+
+
+class AdminConversationItem(BaseModel):
+    """Conversation summary for admin live view."""
+
+    id: UUID
+    user_id: UUID
+    user_name: Optional[str] = None
+    telegram_username: Optional[str] = None
+    telegram_id: Optional[int] = None
+    phone_number: Optional[str] = None
+    platform: str
+    platform_conversation_id: Optional[str] = None
+    title: Optional[str] = None
+    status: str
+    handling_mode: str
+    message_count: int
+    last_message_text: Optional[str] = None
+    last_message_time: Optional[datetime] = None
+    created_at: datetime
+
+
+class AdminConversationDetail(BaseModel):
+    """Detailed conversation view with full message stream and metadata."""
+
+    conversation: AdminConversationItem
+    messages: List[dict]
+    user_profile: TelegramUserItem
+
+
+class BotHealthResponse(BaseModel):
+    """System and bot status monitoring."""
+
+    bot_name: str
+    bot_username: str
+    bot_status: str
+    api_status: str
+    database_status: str
+    database_latency_ms: float
+    model_provider: str
+    model_name: str
+    last_message_at: Optional[datetime] = None
+    recent_errors_count: int = 0
+    ollama_available: bool = False
+    installed_models: List[str] = []
 
 
 class AdminUserList(BaseModel):
