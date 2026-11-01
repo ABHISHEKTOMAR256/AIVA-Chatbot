@@ -22,24 +22,32 @@ export default function LandingPage() {
   const router = useRouter();
   const supabase = createClient();
   const [signingIn, setSigningIn] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const telegramBotUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "AIVA_LPU_bot";
 
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
+    setAuthError(null);
     try {
       await signInWithGooglePopup();
       window.location.href = "/dashboard";
     } catch (err: any) {
-      console.warn("Firebase sign-in popup closed or error:", err);
-      try {
-        await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-      } catch (oauthErr: any) {
-        alert("Google Sign-In failed: " + (err?.message || "Please check configuration"));
+      console.error("Firebase sign-in error:", err);
+      const code = err?.code || "";
+      if (code === "auth/configuration-not-found" || err?.message?.includes("CONFIGURATION_NOT_FOUND")) {
+        setAuthError(
+          "⚠️ Google Sign-In is not enabled in Firebase Console! Go to Firebase Console ➔ Authentication ➔ Sign-in method ➔ Google ➔ click Enable and Save."
+        );
+      } else if (code === "auth/unauthorized-domain") {
+        setAuthError(
+          `⚠️ Domain (${typeof window !== "undefined" ? window.location.hostname : "this domain"}) is not authorized. Open http://localhost:3000 or add it in Firebase ➔ Auth ➔ Settings ➔ Authorized domains.`
+        );
+      } else if (code === "auth/popup-closed-by-user") {
+        setAuthError("Sign-in cancelled: The Google popup window was closed before completing.");
+      } else if (code === "auth/popup-blocked") {
+        setAuthError("Popup blocked: Please allow popups for localhost in your browser address bar.");
+      } else {
+        setAuthError(err?.message || "Google Sign-in error. Please verify Firebase project setup.");
       }
     } finally {
       setSigningIn(false);
@@ -86,6 +94,18 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+        {authError && (
+          <div className="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-medium flex items-center justify-between gap-3 text-left shadow-sm">
+            <span>{authError}</span>
+            <button
+              onClick={() => setAuthError(null)}
+              className="text-amber-700 hover:text-amber-900 font-bold px-2 py-1 text-xs rounded hover:bg-amber-100"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold mb-6">
           <Zap className="w-3.5 h-3.5" />
           Powered by Local Ollama AI & PostgreSQL

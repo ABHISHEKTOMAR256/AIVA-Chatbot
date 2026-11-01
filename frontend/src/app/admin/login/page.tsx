@@ -31,17 +31,18 @@ export default function AdminLoginPage() {
       );
       window.location.href = "/admin";
     } catch (err: any) {
-      console.warn("Firebase Google popup error:", err);
-      try {
-        const supabase = createClient();
-        await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/auth/callback?next=/admin`,
-          },
-        });
-      } catch (oauthErr: any) {
-        setError(err.message || "Failed to authenticate with Google.");
+      console.error("Firebase Google popup error:", err);
+      const code = err?.code || "";
+      if (code === "auth/configuration-not-found" || err?.message?.includes("CONFIGURATION_NOT_FOUND")) {
+        setError("⚠️ Google Sign-In is not enabled in Firebase Console! Please go to Firebase Console ➔ Authentication ➔ Sign-in method ➔ Google ➔ click Enable and Save.");
+      } else if (code === "auth/unauthorized-domain") {
+        setError(`⚠️ Domain (${typeof window !== "undefined" ? window.location.hostname : "current"}) is not authorized. Please open http://localhost:3000 (not 127.0.0.1) or add it in Firebase ➔ Auth ➔ Settings ➔ Authorized domains.`);
+      } else if (code === "auth/popup-closed-by-user") {
+        setError("Sign-in cancelled: The Google popup window was closed before completing.");
+      } else if (code === "auth/popup-blocked") {
+        setError("Popup blocked: Please allow popups for localhost in your browser address bar.");
+      } else {
+        setError(err?.message || "Google Sign-in failed. Please verify Firebase project setup.");
       }
     }
   };
