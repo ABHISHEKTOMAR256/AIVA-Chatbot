@@ -47,7 +47,10 @@ async function apiClient<T>(
 
   let token = session?.access_token;
   if (!token && typeof window !== "undefined") {
-    token = localStorage.getItem("aiva_admin_token") || undefined;
+    token =
+      localStorage.getItem("aiva_admin_token") ||
+      localStorage.getItem("aiva_firebase_token") ||
+      undefined;
   }
 
   if (token) {

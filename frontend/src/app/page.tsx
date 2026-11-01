@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { signInWithGooglePopup } from "@/lib/firebase";
 import {
   Bot,
   MessageSquare,
@@ -16,16 +19,31 @@ import {
 import { Button } from "@/components/ui/Button";
 
 export default function LandingPage() {
+  const router = useRouter();
   const supabase = createClient();
-  const telegramBotUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "aiva_hostel_bot";
+  const [signingIn, setSigningIn] = useState(false);
+  const telegramBotUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "AIVA_LPU_bot";
 
   const handleGoogleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    setSigningIn(true);
+    try {
+      await signInWithGooglePopup();
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.warn("Firebase sign-in popup closed or error:", err);
+      try {
+        await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+      } catch (oauthErr: any) {
+        alert("Google Sign-In failed: " + (err?.message || "Please check configuration"));
+      }
+    } finally {
+      setSigningIn(false);
+    }
   };
 
   return (

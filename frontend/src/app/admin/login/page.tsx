@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminLogin, ApiError } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import { signInWithGooglePopup } from "@/lib/firebase";
 import NeuralOrb from "@/components/3d/NeuralOrb";
 import { Shield, Lock, User, ArrowRight, AlertCircle, Bot, Sparkles } from "lucide-react";
 
@@ -16,15 +17,30 @@ export default function AdminLoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/admin`,
-        },
-      });
+      const { credential } = await signInWithGooglePopup();
+      localStorage.setItem(
+        "aiva_admin_user",
+        JSON.stringify({
+          id: credential.user.uid,
+          email: credential.user.email,
+          full_name: credential.user.displayName,
+          role: "admin",
+        })
+      );
+      router.push("/admin");
     } catch (err: any) {
-      setError(err.message || "Failed to initiate Google authentication.");
+      console.warn("Firebase Google popup error:", err);
+      try {
+        const supabase = createClient();
+        await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback?next=/admin`,
+          },
+        });
+      } catch (oauthErr: any) {
+        setError(err.message || "Failed to authenticate with Google.");
+      }
     }
   };
 
