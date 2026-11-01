@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   MessageSquare,
@@ -26,7 +26,7 @@ import {
 } from "@/lib/api";
 import type { AdminConversationItem, AdminConversationDetail } from "@/types";
 
-export default function LiveConversationsPage() {
+function LiveConversationsContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get("id");
 
@@ -475,5 +475,22 @@ export default function LiveConversationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LiveConversationsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-[70vh] flex items-center justify-center text-xs font-mono text-cyan-400">
+          <div className="flex items-center gap-2">
+            <span className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            Loading 3-Panel Control Room...
+          </div>
+        </div>
+      }
+    >
+      <LiveConversationsContent />
+    </Suspense>
   );
 }
