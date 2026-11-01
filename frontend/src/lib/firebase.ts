@@ -57,6 +57,8 @@ export async function signInWithGooglePopup(): Promise<{
   const idToken = await result.user.getIdToken();
 
   if (typeof window !== "undefined") {
+    // Set session cookie for Next.js middleware routing
+    document.cookie = "aiva_auth_session=1; path=/; max-age=2592000; SameSite=Lax";
     localStorage.setItem("aiva_firebase_token", idToken);
     localStorage.setItem(
       "aiva_firebase_user",
@@ -78,6 +80,7 @@ export async function signInWithGooglePopup(): Promise<{
 export async function signOutFirebase(): Promise<void> {
   await signOut(auth);
   if (typeof window !== "undefined") {
+    document.cookie = "aiva_auth_session=; path=/; max-age=0; SameSite=Lax";
     localStorage.removeItem("aiva_firebase_token");
     localStorage.removeItem("aiva_firebase_user");
   }

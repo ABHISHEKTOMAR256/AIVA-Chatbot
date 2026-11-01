@@ -28,7 +28,7 @@ export default function LandingPage() {
     setSigningIn(true);
     try {
       await signInWithGooglePopup();
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.warn("Firebase sign-in popup closed or error:", err);
       try {

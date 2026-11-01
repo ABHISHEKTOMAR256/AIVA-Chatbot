@@ -8,44 +8,52 @@ const protectedRoutes = [
   "/lost-found",
   "/admin",
 ];
-const adminRoutes = ["/admin"];
-const publicRoutes = ["/", "/auth/callback"];
+const publicRoutes = ["/", "/auth/callback", "/admin/login"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
-  if (publicRoutes.some((route) => pathname === route)) {
+  // Allow public routes immediately
+  if (publicRoutes.includes(pathname)) {
     const { supabaseResponse } = await updateSession(request);
     return supabaseResponse;
   }
 
-  // Check if the route is protected
+  // Check if route requires authentication
   const isProtected = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
-  const isAdmin = adminRoutes.some((route) => pathname.startsWith(route));
 
   if (!isProtected) {
     const { supabaseResponse } = await updateSession(request);
     return supabaseResponse;
   }
 
+  // Check multiple authentication providers (Supabase session, Firebase session cookie, Admin JWT)
   const { supabaseResponse, user } = await updateSession(request);
+  const adminToken = request.cookies.get("aiva_admin_token")?.value;
+  const authSessionCookie = request.cookies.get("aiva_auth_session")?.value;
 
-  if (!user) {
+  const isAuthenticated = Boolean(user || authSessionCookie || adminToken);
+
+  if (!isAuthenticated) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
-    url.searchParams.set("redirect", pathname);
+    if (pathname.startsWith("/admin")) {
+      url.pathname = "/admin/login";
+    } else {
+      url.pathname = "/";
+      url.searchParams.set("redirect", pathname);
+    }
     return NextResponse.redirect(url);
   }
 
-  // Check admin access via user metadata
-  if (isAdmin) {
-    const role = user.user_metadata?.role;
-    if (role !== "admin") {
+  // Check admin route access
+  const isAdminPath = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  if (isAdminPath) {
+    const isSupabaseAdmin = user?.user_metadata?.role === "admin";
+    if (!adminToken && !isSupabaseAdmin) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
   }

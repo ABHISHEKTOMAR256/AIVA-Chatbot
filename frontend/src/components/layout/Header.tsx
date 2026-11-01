@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { signOutFirebase } from "@/lib/firebase";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { LogOut, Bot, Shield, Bell } from "lucide-react";
@@ -17,7 +18,13 @@ export function Header({ user }: HeaderProps) {
   const supabase = createClient();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await signOutFirebase();
+    } catch {}
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    document.cookie = "aiva_auth_session=; path=/; max-age=0; SameSite=Lax";
     router.push("/");
     router.refresh();
   };

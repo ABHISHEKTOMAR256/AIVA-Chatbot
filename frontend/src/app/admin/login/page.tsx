@@ -18,6 +18,8 @@ export default function AdminLoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       const { credential } = await signInWithGooglePopup();
+      document.cookie = `aiva_admin_token=firebase_${credential.user.uid}; path=/; max-age=2592000; SameSite=Lax`;
+      localStorage.setItem("aiva_admin_token", `firebase_${credential.user.uid}`);
       localStorage.setItem(
         "aiva_admin_user",
         JSON.stringify({
@@ -27,7 +29,7 @@ export default function AdminLoginPage() {
           role: "admin",
         })
       );
-      router.push("/admin");
+      window.location.href = "/admin";
     } catch (err: any) {
       console.warn("Firebase Google popup error:", err);
       try {
