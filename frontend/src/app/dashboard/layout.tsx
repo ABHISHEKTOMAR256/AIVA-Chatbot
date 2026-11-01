@@ -20,6 +20,35 @@ export default function DashboardLayout({
 
   useEffect(() => {
     async function loadUser() {
+      // 1. Check Firebase authenticated user in localStorage
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("aiva_firebase_user");
+        if (stored) {
+          try {
+            const fbUser = JSON.parse(stored);
+            if (fbUser && fbUser.email) {
+              setUser({
+                id: fbUser.uid || "firebase-user",
+                email: fbUser.email || "",
+                full_name:
+                  fbUser.displayName ||
+                  fbUser.email?.split("@")[0] ||
+                  "Student Resident",
+                avatar_url: fbUser.photoURL || undefined,
+                role: "student",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error("Error reading firebase session:", e);
+          }
+        }
+      }
+
+      // 2. Check Supabase session
       const {
         data: { user: authUser },
       } = await supabase.auth.getUser();
