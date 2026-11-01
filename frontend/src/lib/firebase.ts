@@ -59,7 +59,9 @@ export async function signInWithGooglePopup(): Promise<{
   if (typeof window !== "undefined") {
     // Set session cookie for Next.js middleware routing
     document.cookie = "aiva_auth_session=1; path=/; max-age=2592000; SameSite=Lax";
+    document.cookie = `aiva_admin_token=firebase_${result.user.uid}; path=/; max-age=2592000; SameSite=Lax`;
     localStorage.setItem("aiva_firebase_token", idToken);
+    localStorage.setItem("aiva_admin_token", `firebase_${result.user.uid}`);
     localStorage.setItem(
       "aiva_firebase_user",
       JSON.stringify({
@@ -67,6 +69,16 @@ export async function signInWithGooglePopup(): Promise<{
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
+        role: "admin",
+      })
+    );
+    localStorage.setItem(
+      "aiva_admin_user",
+      JSON.stringify({
+        id: result.user.uid,
+        email: result.user.email,
+        full_name: result.user.displayName,
+        role: "admin",
       })
     );
   }
@@ -81,7 +93,10 @@ export async function signOutFirebase(): Promise<void> {
   await signOut(auth);
   if (typeof window !== "undefined") {
     document.cookie = "aiva_auth_session=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "aiva_admin_token=; path=/; max-age=0; SameSite=Lax";
     localStorage.removeItem("aiva_firebase_token");
     localStorage.removeItem("aiva_firebase_user");
+    localStorage.removeItem("aiva_admin_token");
+    localStorage.removeItem("aiva_admin_user");
   }
 }

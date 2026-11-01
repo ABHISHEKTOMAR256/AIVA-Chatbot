@@ -126,7 +126,7 @@ export default function AdminOverviewPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `alona_telegram_users_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `aiva_telegram_users_${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -142,7 +142,7 @@ export default function AdminOverviewPage() {
       <div className="min-h-[70vh] flex flex-col items-center justify-center gap-4">
         <NeuralOrb size={180} />
         <div className="text-sm font-mono text-cyan-400 animate-pulse">
-          Connecting to ALONA 3D Neural Telemetry...
+          Connecting to AIVA 3D Neural Telemetry...
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ export default function AdminOverviewPage() {
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="px-2.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 text-xs font-mono flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
               <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              ALONA 3D AI CONTROL CENTER
+              AIVA 3D CHATBOT CONTROL CENTER
             </span>
             {isGuest ? (
               <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-mono font-bold">
@@ -441,7 +441,7 @@ export default function AdminOverviewPage() {
             <div>
               <h3 className="text-base font-bold text-white">Recent Live Interactions</h3>
               <p className="text-xs text-slate-400 font-mono">
-                {isGuest ? "Demonstration previews (Sign in to view real student queries)" : "Latest student queries answered by ALONA"}
+                {isGuest ? "Demonstration previews (Sign in to view real student queries)" : "Latest student queries answered by AIVA"}
               </p>
             </div>
             <Link

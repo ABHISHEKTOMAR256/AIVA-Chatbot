@@ -52,7 +52,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // The 11 core navigation sections required by ALONA AI specification
+  // The 11 core navigation sections for AIVA Chatbot Admin Dashboard
   const navItems = [
     { label: "Overview", href: "/admin", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
@@ -76,7 +76,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <Bot className="w-5 h-5" />
           </div>
           <span className="font-bold tracking-tight text-white font-mono text-sm">
-            ALONA <span className="text-cyan-400">CONTROL</span>
+            AIVA <span className="text-cyan-400">CONTROL</span>
           </span>
         </div>
         <button
@@ -104,7 +104,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <div className="font-bold tracking-tight text-sm text-white font-mono flex items-center gap-1.5">
-                ALONA 3D CORE
+                AIVA 3D CORE
                 <span className="px-1.5 py-0.5 text-[9px] rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   {isAdmin ? "ADMIN" : "GUEST"}
                 </span>
@@ -219,7 +219,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                   Guest Preview
                 </span>
                 <span>
-                  You are previewing ALONA AI with demonstration data. Real administrative actions require authentication.
+                  You are previewing AIVA Chatbot Control Center with demonstration data. Real administrative actions require authentication.
                 </span>
               </div>
               <div className="flex items-center gap-2">
