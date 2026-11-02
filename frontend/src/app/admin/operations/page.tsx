@@ -209,55 +209,55 @@ export default function ManualOperationsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header Deck */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.25)]">
-            <FileText className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-card rounded-3xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+            <FileText className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
               Manual Operations Hub
               {isGuest && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+                <span className="text-xs px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 border border-amber-500/30 font-medium">
                   Guest Mode
                 </span>
               )}
             </h1>
-            <p className="text-xs text-slate-400 font-mono">
-              Administrative manual execution: Hostel complaints, room repairs, and lost & found resolution
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Administrative manual execution: Hostel complaints, room repairs, and lost &amp; found resolution
             </p>
           </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-2 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <div className="flex items-center gap-2 glass-card p-1.5 rounded-full shadow-sm">
           <button
             onClick={() => setActiveTab("complaints")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
               activeTab === "complaints"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold"
-                : "text-slate-400 hover:text-white"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Hostel Complaints
           </button>
           <button
             onClick={() => setActiveTab("lost_found")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
               activeTab === "lost_found"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold"
-                : "text-slate-400 hover:text-white"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            Lost & Found Hub
+            Lost &amp; Found Hub
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center justify-between gap-2">
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 text-xs font-medium flex items-center justify-between gap-2 shadow-sm">
           <span>✅ {actionSuccess}</span>
-          <button onClick={() => setActionSuccess(null)} className="text-slate-400 hover:text-white">
+          <button onClick={() => setActionSuccess(null)} className="text-emerald-700 hover:text-emerald-950">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -271,7 +271,7 @@ export default function ManualOperationsPage() {
               <select
                 value={complaintFilter}
                 onChange={(e) => setComplaintFilter(e.target.value)}
-                className="bg-slate-900 border border-slate-800 text-slate-200 text-xs font-mono px-3 py-2 rounded-xl outline-none"
+                className="glass-card text-slate-700 text-xs font-medium px-4 py-2.5 rounded-full outline-none shadow-sm cursor-pointer"
               >
                 <option value="">All Statuses</option>
                 <option value="submitted">Submitted</option>
@@ -287,41 +287,41 @@ export default function ManualOperationsPage() {
                   setIsNewComplaintOpen(true);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all cursor-pointer"
+              className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-md"
             >
               <Plus className="w-4 h-4" />
               <span>Log Manual Complaint</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {complaints.map((c) => (
               <div
                 key={c.id}
-                className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl flex flex-col justify-between gap-4"
+                className="p-6 rounded-3xl glass-card glass-card-hover flex flex-col justify-between gap-4"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[11px] font-mono text-cyan-400 font-bold">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200/60">
                       {c.reference_number || "CMP-2026"}
                     </span>
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${
+                      className={`text-[11px] font-semibold px-3 py-1 rounded-full uppercase ${
                         c.priority === "high" || c.priority === "urgent"
-                          ? "bg-red-500/20 text-red-300 border border-red-500/30"
-                          : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          ? "bg-rose-50 text-rose-700 border border-rose-200/60"
+                          : "bg-blue-50 text-blue-700 border border-blue-200/60"
                       }`}
                     >
                       {c.priority} priority
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white mb-1">{c.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed mb-3">{c.description}</p>
+                  <h3 className="text-base font-bold text-slate-900 mb-1.5">{c.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">{c.description}</p>
 
-                  <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-cyan-400" />
+                  <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-blue-600" />
                       {c.location || "Hostel Block"}, Room {c.room_number || "N/A"}
                     </span>
                     <span>•</span>
@@ -329,16 +329,16 @@ export default function ManualOperationsPage() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono text-slate-400">
-                    Status: <strong className="text-white uppercase">{c.status}</strong>
+                <div className="pt-4 border-t border-slate-200/70 flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-slate-500">
+                    Status: <strong className="text-slate-800 uppercase font-semibold">{c.status}</strong>
                   </span>
 
                   <div className="flex items-center gap-2">
                     {c.status !== "resolved" && (
                       <button
                         onClick={() => handleUpdateStatus(String(c.id), "resolved")}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono transition-colors"
+                        className="px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/70 text-emerald-700 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                       >
                         Resolve
                       </button>
@@ -346,7 +346,7 @@ export default function ManualOperationsPage() {
                     {c.status === "submitted" && (
                       <button
                         onClick={() => handleUpdateStatus(String(c.id), "in_progress")}
-                        className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-[11px] font-mono transition-colors"
+                        className="px-3.5 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200/70 text-blue-700 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                       >
                         In Progress
                       </button>
@@ -369,53 +369,53 @@ export default function ManualOperationsPage() {
                   setIsNewLostFoundOpen(true);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all cursor-pointer"
+              className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-md"
             >
               <Plus className="w-4 h-4" />
               <span>Catalog Lost/Found Item</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {lostFoundItems.map((item) => (
               <div
                 key={item.id}
-                className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl flex flex-col justify-between gap-4"
+                className="p-6 rounded-3xl glass-card glass-card-hover flex flex-col justify-between gap-4"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center justify-between gap-2 mb-3">
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full uppercase font-bold ${
+                      className={`text-[11px] font-semibold px-3 py-1 rounded-full uppercase ${
                         item.item_type === "lost"
-                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                          : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                       }`}
                     >
                       {item.item_type} ITEM
                     </span>
-                    <span className="text-[10px] font-mono text-slate-400 capitalize">
+                    <span className="text-xs font-medium text-slate-500 capitalize">
                       {item.category}
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white mb-1">{item.title}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed mb-3">{item.description}</p>
+                  <h3 className="text-base font-bold text-slate-900 mb-1.5">{item.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4">{item.description}</p>
 
-                  <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400">
-                    <MapPin className="w-3 h-3 text-cyan-400" />
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <MapPin className="w-3.5 h-3.5 text-blue-600" />
                     <span>Location: {item.location}</span>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                  <span className="text-xs font-mono text-slate-400">
-                    Status: <strong className="text-white uppercase">{item.status}</strong>
+                <div className="pt-4 border-t border-slate-200/70 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-500">
+                    Status: <strong className="text-slate-800 uppercase font-semibold">{item.status}</strong>
                   </span>
 
                   {item.status !== "returned" && (
                     <button
                       onClick={() => handleMarkItemReturned(String(item.id))}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono transition-colors"
+                      className="px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/70 text-emerald-700 text-xs font-semibold transition-all cursor-pointer shadow-sm"
                     >
                       Mark Returned
                     </button>
@@ -429,36 +429,36 @@ export default function ManualOperationsPage() {
 
       {/* Manual Complaint Modal */}
       {isNewComplaintOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-lg bg-[#0b0f19] border border-cyan-500/30 rounded-2xl p-6 text-slate-100 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md">
+          <div className="relative w-full max-w-lg glass-card rounded-3xl p-7 text-slate-800 shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-white/90">
             <button
               onClick={() => setIsNewComplaintOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700"
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-white mb-4">Log New Hostel Complaint</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-5">Log New Hostel Complaint</h3>
 
             <form onSubmit={handleCreateComplaint} className="space-y-4">
               <div>
-                <label className="text-xs font-mono text-slate-400 block mb-1">Issue Title</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Issue Title</label>
                 <input
                   type="text"
                   required
                   value={newComplaintData.title}
                   onChange={(e) => setNewComplaintData({ ...newComplaintData, title: e.target.value })}
                   placeholder="e.g. Broken study table chair"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Category</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Category</label>
                   <select
                     value={newComplaintData.category}
                     onChange={(e) => setNewComplaintData({ ...newComplaintData, category: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-3 py-2.5 text-xs text-slate-800 outline-none cursor-pointer"
                   >
                     <option value="electricity">Electricity</option>
                     <option value="water_supply">Water Supply</option>
@@ -471,11 +471,11 @@ export default function ManualOperationsPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Priority</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Priority</label>
                   <select
                     value={newComplaintData.priority}
                     onChange={(e) => setNewComplaintData({ ...newComplaintData, priority: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-3 py-2.5 text-xs text-slate-800 outline-none cursor-pointer"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -487,50 +487,50 @@ export default function ManualOperationsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Block / Location</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Block / Location</label>
                   <input
                     type="text"
                     required
                     value={newComplaintData.location}
                     onChange={(e) => setNewComplaintData({ ...newComplaintData, location: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Room Number</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Room Number</label>
                   <input
                     type="text"
                     required
                     value={newComplaintData.room_number}
                     onChange={(e) => setNewComplaintData({ ...newComplaintData, room_number: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-mono text-slate-400 block mb-1">Detailed Description</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Detailed Description</label>
                 <textarea
                   rows={3}
                   required
                   value={newComplaintData.description}
                   onChange={(e) => setNewComplaintData({ ...newComplaintData, description: e.target.value })}
                   placeholder="Provide complete breakdown of the maintenance issue..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsNewComplaintOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 text-slate-400 text-xs font-medium"
+                  className="px-5 py-2.5 rounded-full glass-card text-slate-600 text-xs font-semibold hover:text-slate-900 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs"
+                  className="btn-luminous-primary px-6 py-2.5 rounded-full text-xs font-semibold cursor-pointer shadow-md"
                 >
                   Create Ticket
                 </button>
@@ -542,35 +542,35 @@ export default function ManualOperationsPage() {
 
       {/* Manual Lost & Found Modal */}
       {isNewLostFoundOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-lg bg-[#0b0f19] border border-cyan-500/30 rounded-2xl p-6 text-slate-100 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md">
+          <div className="relative w-full max-w-lg glass-card rounded-3xl p-7 text-slate-800 shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-white/90">
             <button
               onClick={() => setIsNewLostFoundOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700"
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-bold text-white mb-4">Catalog Lost / Found Item</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-5">Catalog Lost / Found Item</h3>
 
             <form onSubmit={handleCreateLostFound} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Report Type</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Report Type</label>
                   <select
                     value={newLostFoundData.item_type}
                     onChange={(e) => setNewLostFoundData({ ...newLostFoundData, item_type: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-3 py-2.5 text-xs text-slate-800 outline-none cursor-pointer"
                   >
                     <option value="lost">Lost Item</option>
                     <option value="found">Found Item</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-mono text-slate-400 block mb-1">Category</label>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1.5">Category</label>
                   <select
                     value={newLostFoundData.category}
                     onChange={(e) => setNewLostFoundData({ ...newLostFoundData, category: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                    className="w-full glass-input rounded-2xl px-3 py-2.5 text-xs text-slate-800 outline-none cursor-pointer"
                   >
                     <option value="electronics">Electronics</option>
                     <option value="documents">Documents / ID Cards</option>
@@ -583,52 +583,52 @@ export default function ManualOperationsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-mono text-slate-400 block mb-1">Item Title</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Item Title</label>
                 <input
                   type="text"
                   required
                   value={newLostFoundData.title}
                   onChange={(e) => setNewLostFoundData({ ...newLostFoundData, title: e.target.value })}
                   placeholder="e.g. Titan Silver Wristwatch"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-mono text-slate-400 block mb-1">Found / Lost Location</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Found / Lost Location</label>
                 <input
                   type="text"
                   required
                   value={newLostFoundData.location}
                   onChange={(e) => setNewLostFoundData({ ...newLostFoundData, location: e.target.value })}
                   placeholder="e.g. 1st Floor Study Room, Mess Gate"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                  className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-mono text-slate-400 block mb-1">Description</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1.5">Description</label>
                 <textarea
                   rows={3}
                   required
                   value={newLostFoundData.description}
                   onChange={(e) => setNewLostFoundData({ ...newLostFoundData, description: e.target.value })}
                   placeholder="Describe unique markings, color, brand..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none"
+                  className="w-full glass-input rounded-2xl px-4 py-2.5 text-xs text-slate-800 outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsNewLostFoundOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 text-slate-400 text-xs font-medium"
+                  className="px-5 py-2.5 rounded-full glass-card text-slate-600 text-xs font-semibold hover:text-slate-900 transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs"
+                  className="btn-luminous-primary px-6 py-2.5 rounded-full text-xs font-semibold cursor-pointer shadow-md"
                 >
                   Save to Catalog
                 </button>

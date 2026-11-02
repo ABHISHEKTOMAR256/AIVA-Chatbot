@@ -60,14 +60,21 @@ export default function AdminComplaintsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-          Admin Complaint Management
-        </h1>
-        <p className="text-xs text-gray-500 mt-1">
-          Review, assign staff, and update resolution status for all hostel complaints.
-        </p>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-card rounded-3xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+            <Shield className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              Admin Complaint Management
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Review, assign staff, and update resolution status for all hostel complaints.
+            </p>
+          </div>
+        </div>
       </div>
 
       {loading ? (
@@ -75,77 +82,81 @@ export default function AdminComplaintsPage() {
           <Spinner size="lg" />
         </div>
       ) : complaints.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-md mx-auto">
-          <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3 stroke-1" />
-          <h3 className="font-bold text-gray-800 text-sm">No complaints logged</h3>
-          <p className="text-xs text-gray-500 mt-1">
+        <div className="glass-card rounded-3xl p-12 text-center max-w-md mx-auto space-y-3">
+          <AlertCircle className="w-12 h-12 text-slate-300 mx-auto stroke-1" />
+          <h3 className="font-bold text-slate-800 text-sm">No complaints logged</h3>
+          <p className="text-xs text-slate-500 font-medium">
             Complaints submitted by students will appear in this administrative table.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="rounded-3xl glass-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase tracking-wider font-semibold">
+              <thead className="bg-white/40 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Ref Number</th>
-                  <th className="py-3 px-4">Student</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Title & Room</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Reported</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-4 px-5">Ref Number</th>
+                  <th className="py-4 px-5">Student</th>
+                  <th className="py-4 px-5">Category</th>
+                  <th className="py-4 px-5">Title &amp; Room</th>
+                  <th className="py-4 px-5">Priority</th>
+                  <th className="py-4 px-5">Status</th>
+                  <th className="py-4 px-5">Reported</th>
+                  <th className="py-4 px-5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100">
                 {complaints.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-indigo-700">
+                  <tr key={c.id} className="hover:bg-blue-50/50 transition-colors group">
+                    <td className="py-4 px-5 font-mono font-bold text-blue-600">
                       {c.reference_number}
                     </td>
-                    <td className="py-3.5 px-4 font-medium text-gray-800">
+                    <td className="py-4 px-5 font-semibold text-slate-800">
                       {c.user?.full_name || "Resident"}
                     </td>
-                    <td className="py-3.5 px-4 capitalize text-gray-600">
+                    <td className="py-4 px-5 capitalize text-slate-600 font-medium">
                       {c.category.replace("_", " ")}
                     </td>
-                    <td className="py-3.5 px-4 max-w-xs truncate">
-                      <span className="font-semibold text-gray-900 block truncate">{c.title}</span>
-                      <span className="text-[11px] text-gray-400">
+                    <td className="py-4 px-5 max-w-xs truncate">
+                      <span className="font-semibold text-slate-900 block truncate">{c.title}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">
                         Room {c.room_number || "N/A"}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-4 px-5">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase ${
                           c.priority === "urgent"
-                            ? "bg-red-100 text-red-800"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200"
                             : c.priority === "high"
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-gray-100 text-gray-700"
+                            ? "bg-amber-50 text-amber-700 border border-amber-200"
+                            : "bg-slate-100 text-slate-700 border border-slate-200/60"
                         }`}
                       >
                         {c.priority}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <Badge variant={c.status === "resolved" ? "success" : "warning"}>
+                    <td className="py-4 px-5">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase ${
+                          c.status === "resolved"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
+                      >
                         {c.status.replace("_", " ")}
-                      </Badge>
+                      </span>
                     </td>
-                    <td className="py-3.5 px-4 text-gray-400 text-[11px]">
+                    <td className="py-4 px-5 text-slate-400 text-xs font-medium">
                       {formatRelativeTime(c.created_at)}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Button
+                    <td className="py-4 px-5 text-right">
+                      <button
                         onClick={() => handleOpenManage(c)}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                        className="px-3.5 py-1.5 rounded-full glass-card hover:bg-white text-xs font-semibold text-blue-600 shadow-sm transition-all cursor-pointer"
                       >
                         Update
-                      </Button>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -164,19 +175,19 @@ export default function AdminComplaintsPage() {
         {selectedComplaint && (
           <form onSubmit={handleUpdate} className="space-y-4">
             <div>
-              <p className="text-xs font-bold text-gray-700 mb-1">Issue Title:</p>
-              <p className="text-sm font-semibold text-gray-900">{selectedComplaint.title}</p>
-              <p className="text-xs text-gray-500 mt-1">{selectedComplaint.description}</p>
+              <p className="text-xs font-bold text-slate-600 mb-1">Issue Title:</p>
+              <p className="text-sm font-semibold text-slate-900">{selectedComplaint.title}</p>
+              <p className="text-xs text-slate-500 mt-1">{selectedComplaint.description}</p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Update Status *
               </label>
               <select
                 value={newStatus}
                 onChange={(e) => setNewStatus(e.target.value as ComplaintStatus)}
-                className="w-full text-xs rounded-lg border border-gray-300 p-2.5 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                className="w-full glass-input text-xs rounded-2xl p-3 outline-none cursor-pointer"
               >
                 <option value="submitted">Submitted</option>
                 <option value="acknowledged">Acknowledged (Verified by staff)</option>
@@ -187,7 +198,7 @@ export default function AdminComplaintsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                 Staff Reply / Note to Student
               </label>
               <textarea
@@ -195,17 +206,25 @@ export default function AdminComplaintsPage() {
                 placeholder="e.g. Electrician visited Room 302 and replaced the switch capacitor."
                 value={staffReply}
                 onChange={(e) => setStaffReply(e.target.value)}
-                className="w-full text-xs rounded-lg border border-gray-300 p-2.5 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                className="w-full glass-input text-xs rounded-2xl p-3 outline-none"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
-              <Button type="button" variant="ghost" onClick={() => setSelectedComplaint(null)}>
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setSelectedComplaint(null)}
+                className="px-5 py-2.5 rounded-full glass-card hover:bg-white text-slate-600 text-xs font-semibold transition-all cursor-pointer"
+              >
                 Cancel
-              </Button>
-              <Button type="submit" disabled={isUpdating} className="bg-indigo-600 text-white">
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="btn-luminous-primary px-6 py-2.5 rounded-full text-xs font-semibold cursor-pointer shadow-md"
+              >
                 {isUpdating ? "Saving..." : "Save Status"}
-              </Button>
+              </button>
             </div>
           </form>
         )}

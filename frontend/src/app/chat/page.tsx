@@ -150,7 +150,7 @@ function ChatContent() {
   const activeConv = conversations.find((c) => c.id === activeConvId);
 
   return (
-    <div className="h-[calc(100vh-7rem)] bg-white rounded-2xl border border-gray-200 overflow-hidden flex shadow-sm">
+    <div className="h-[calc(100vh-7rem)] glass-card rounded-3xl border border-white/80 overflow-hidden flex shadow-sm">
       <ConversationList
         conversations={conversations}
         activeId={activeConvId}
@@ -158,17 +158,17 @@ function ChatContent() {
         onNewChat={handleNewChat}
       />
 
-      <div className="flex-1 flex flex-col h-full bg-gray-50/50">
-        <div className="h-14 border-b border-gray-200 bg-white px-4 sm:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+      <div className="flex-1 flex flex-col h-full bg-white/30 backdrop-blur-md">
+        <div className="h-16 border-b border-white/80 bg-white/40 px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]">
               <Bot className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs font-bold text-gray-900 leading-tight">
+              <h2 className="text-xs font-bold text-slate-900 leading-tight">
                 {activeConv?.title || "AIVA Virtual Assistant"}
               </h2>
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-slate-400 font-medium">
                 {activeConv?.status === "handed_over"
                   ? "Connected with Staff"
                   : "AI Mode (Ollama + RAG)"}
@@ -177,15 +177,13 @@ function ChatContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
+            <button
               onClick={handleHandover}
-              variant="outline"
-              size="sm"
-              className="text-xs text-amber-700 border-amber-300 hover:bg-amber-50"
+              className="px-3.5 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-200/70 text-amber-700 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
-              <UserCheck className="w-3.5 h-3.5 mr-1 text-amber-600" />
-              Request Staff Help
-            </Button>
+              <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+              <span>Request Staff Help</span>
+            </button>
           </div>
         </div>
 
@@ -196,18 +194,18 @@ function ChatContent() {
             </div>
           ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-sm mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-600 flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-gray-900 text-base mb-1">
+              <h3 className="font-bold text-slate-900 text-base mb-1">
                 How can AIVA help you today?
               </h3>
-              <p className="text-xs text-gray-500 mb-6">
+              <p className="text-xs text-slate-500 mb-6 font-medium">
                 Ask about hostel gate hours, file a Wi-Fi or electricity complaint,
                 or check mess timings.
               </p>
 
-              <div className="grid grid-cols-1 gap-2 w-full text-xs">
+              <div className="grid grid-cols-1 gap-2.5 w-full text-xs">
                 {[
                   "What are the hostel gate timings?",
                   "My room Wi-Fi is not connecting",
@@ -217,9 +215,9 @@ function ChatContent() {
                   <button
                     key={promptText}
                     onClick={() => handleSendMessage(promptText)}
-                    className="p-2.5 rounded-lg border border-gray-200 bg-white hover:bg-indigo-50 hover:border-indigo-200 text-gray-700 text-left transition-colors font-medium"
+                    className="p-3 rounded-2xl glass-card hover:bg-white text-slate-700 text-left transition-all font-medium border border-white/80 shadow-sm cursor-pointer"
                   >
-                    "{promptText}"
+                    &ldquo;{promptText}&rdquo;
                   </button>
                 ))}
               </div>

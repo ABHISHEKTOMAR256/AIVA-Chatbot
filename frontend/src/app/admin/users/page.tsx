@@ -179,11 +179,13 @@ export default function TelegramUsersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-cyan-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+              <Users className="w-5 h-5" />
+            </div>
             Telegram Student Directory
           </h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Verified Telegram users interacting with @AIVA_LPU_bot ({total} total registered)
           </p>
         </div>
@@ -191,7 +193,7 @@ export default function TelegramUsersPage() {
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-600/20 hover:from-cyan-500/30 hover:to-blue-600/30 border border-cyan-500/40 text-cyan-300 text-xs font-mono flex items-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.15)] transition-all cursor-pointer"
+          className="self-start sm:self-auto btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-md"
         >
           <Download className="w-4 h-4" />
           <span>{exporting ? "Exporting..." : "Export Directory (CSV)"}</span>
@@ -199,21 +201,21 @@ export default function TelegramUsersPage() {
       </div>
 
       {/* Search and Filters Toolbar */}
-      <div className="p-4 rounded-2xl bg-[#0b0f19]/80 backdrop-blur-xl border border-cyan-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="p-4 rounded-3xl glass-card flex flex-col md:flex-row items-center justify-between gap-4">
         <form onSubmit={handleSearchSubmit} className="w-full md:w-96 relative">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, @username, TG ID, or phone..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
+            className="w-full pl-10 pr-4 py-2.5 glass-input rounded-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition-colors"
           />
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </form>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <Filter className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            <Filter className="w-3.5 h-3.5 text-blue-600" />
             <span>Contact Filter:</span>
           </div>
 
@@ -223,7 +225,7 @@ export default function TelegramUsersPage() {
               setHasPhoneFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-cyan-400 font-mono"
+            className="px-4 py-2 glass-card rounded-full text-xs font-medium text-slate-700 outline-none cursor-pointer shadow-sm"
           >
             <option value="all">All Telegram Users</option>
             <option value="shared">📱 Phone Shared Only</option>
@@ -233,32 +235,32 @@ export default function TelegramUsersPage() {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-2xl bg-[#0b0f19]/80 backdrop-blur-xl border border-cyan-500/20 overflow-hidden shadow-xl">
+      <div className="rounded-3xl glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/60 font-mono text-slate-400 uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4">Student Profile</th>
-                <th className="py-3.5 px-4">Telegram Handle & ID</th>
-                <th className="py-3.5 px-4">Contact Phone</th>
-                <th className="py-3.5 px-4">Activity</th>
-                <th className="py-3.5 px-4">Last Message</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+              <tr className="border-b border-slate-200/80 bg-white/40 font-semibold text-slate-500 uppercase tracking-wider text-[11px]">
+                <th className="py-4 px-5">Student Profile</th>
+                <th className="py-4 px-5">Telegram Handle & ID</th>
+                <th className="py-4 px-5">Contact Phone</th>
+                <th className="py-4 px-5">Activity</th>
+                <th className="py-4 px-5">Last Message</th>
+                <th className="py-4 px-5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-xs font-mono text-cyan-400">
+                  <td colSpan={6} className="py-12 text-center text-xs font-semibold text-blue-600">
                     <div className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                       Loading Telegram Students...
                     </div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-xs font-mono text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-xs font-medium text-slate-500">
                     No Telegram users matched your filter criteria.
                   </td>
                 </tr>
@@ -266,19 +268,19 @@ export default function TelegramUsersPage() {
                 users.map((u) => (
                   <tr
                     key={u.id}
-                    className="hover:bg-slate-900/40 transition-colors group"
+                    className="hover:bg-blue-50/50 transition-colors group"
                   >
                     {/* Student Profile */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-300 font-bold shrink-0 font-mono">
+                        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-[0_4px_12px_rgba(37,99,235,0.25)] flex items-center justify-center text-white font-bold shrink-0 text-xs">
                           {u.full_name?.[0]?.toUpperCase() || "U"}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-medium text-slate-200">
+                          <div className="font-semibold text-slate-900">
                             {u.full_name || "Telegram User"}
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono">
+                          <div className="text-[10px] text-slate-400 font-medium">
                             Registered {new Date(u.first_interaction).toLocaleDateString()}
                           </div>
                         </div>
@@ -286,66 +288,66 @@ export default function TelegramUsersPage() {
                     </td>
 
                     {/* Telegram Username & ID */}
-                    <td className="py-3.5 px-4 font-mono">
+                    <td className="py-4 px-5 font-mono">
                       {u.telegram_username ? (
-                        <div className="text-cyan-400">@{u.telegram_username}</div>
+                        <div className="text-blue-600 font-semibold">@{u.telegram_username}</div>
                       ) : (
-                        <span className="text-slate-500">No handle</span>
+                        <span className="text-slate-400">No handle</span>
                       )}
-                      <div className="text-[10px] text-slate-500">
+                      <div className="text-[10px] text-slate-400">
                         ID: {u.telegram_id || "N/A"}
                       </div>
                     </td>
 
                     {/* Phone Number */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-4 px-5">
                       {u.phone_number ? (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-400 font-mono text-[11px]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-700 font-mono text-[11px] font-semibold">
                             <PhoneCall className="w-3 h-3" />
                             {u.phone_number}
                           </span>
                           {u.phone_shared_at && (
-                            <div className="text-[10px] text-slate-500 font-mono">
+                            <div className="text-[10px] text-slate-400 font-medium">
                               Verified {new Date(u.phone_shared_at).toLocaleDateString()}
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-500">
-                          <XCircle className="w-3 h-3 text-slate-600" />
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                          <XCircle className="w-3.5 h-3.5 text-slate-300" />
                           Not shared
                         </span>
                       )}
                     </td>
 
                     {/* Activity */}
-                    <td className="py-3.5 px-4 font-mono">
-                      <div className="text-slate-300">
+                    <td className="py-4 px-5">
+                      <div className="text-slate-800 font-semibold">
                         {u.total_messages_sent} msgs
                       </div>
-                      <div className="text-[10px] text-slate-500">
+                      <div className="text-[10px] text-slate-400 font-medium">
                         {u.total_conversations} threads
                       </div>
                     </td>
 
                     {/* Last Message Preview */}
-                    <td className="py-3.5 px-4 max-w-xs">
-                      <p className="truncate text-slate-300 text-[11px]">
+                    <td className="py-4 px-5 max-w-xs">
+                      <p className="truncate text-slate-600 text-xs">
                         {u.last_message_preview || "No message preview"}
                       </p>
                       {u.last_interaction && (
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-[10px] text-slate-400 font-medium">
                           {new Date(u.last_interaction).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-4 px-5 text-right">
                       <button
                         onClick={() => openUserDrawer(u)}
-                        className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-xs font-mono text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-full glass-card hover:bg-white text-xs font-semibold text-blue-600 shadow-sm transition-all cursor-pointer"
                       >
                         History
                       </button>
@@ -358,7 +360,7 @@ export default function TelegramUsersPage() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="p-4 border-t border-slate-200/80 flex items-center justify-between text-xs font-medium text-slate-500 bg-white/30">
           <div>
             Showing {(page - 1) * pageSize + 1} to{" "}
             {Math.min(page * pageSize, total)} of {total} students
@@ -368,17 +370,17 @@ export default function TelegramUsersPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:border-cyan-500/40 text-slate-300"
+              className="p-1.5 rounded-full glass-card disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white text-slate-700 transition-all cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-2">
+            <span className="px-2 font-semibold">
               Page {page} of {totalPages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:border-cyan-500/40 text-slate-300"
+              className="p-1.5 rounded-full glass-card disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white text-slate-700 transition-all cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -388,15 +390,15 @@ export default function TelegramUsersPage() {
 
       {/* User Message History Drawer / Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-end">
-          <div className="w-full max-w-lg h-full bg-[#0b0f19] border-l border-cyan-500/30 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/30 backdrop-blur-md flex items-center justify-end">
+          <div className="w-full max-w-lg h-full glass-card rounded-l-3xl border-l border-white/90 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div className="p-6 border-b border-slate-200/70 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <span>{selectedUser.full_name}</span>
                   {selectedUser.telegram_username && (
-                    <span className="text-xs font-mono text-cyan-400">
+                    <span className="text-xs font-semibold text-blue-600">
                       @{selectedUser.telegram_username}
                     </span>
                   )}
@@ -408,46 +410,46 @@ export default function TelegramUsersPage() {
 
               <button
                 onClick={() => setSelectedUser(null)}
-                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
+                className="p-2 rounded-full glass-card hover:bg-white text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Profile Info Banner */}
-            <div className="p-4 bg-slate-950/70 border-b border-slate-800/80 grid grid-cols-2 gap-3 text-xs font-mono">
+            <div className="p-4 bg-white/50 border-b border-slate-200/60 grid grid-cols-2 gap-3 text-xs font-medium">
               <div>
-                <span className="text-slate-500">Phone Status:</span>
-                <div className="text-slate-200 mt-0.5 font-bold">
+                <span className="text-slate-400">Phone Status:</span>
+                <div className="text-slate-800 mt-0.5 font-bold">
                   {selectedUser.phone_number ? (
-                    <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="text-emerald-600 flex items-center gap-1">
                       <PhoneCall className="w-3 h-3" />
                       {selectedUser.phone_number}
                     </span>
                   ) : (
-                    <span className="text-slate-500">Not shared</span>
+                    <span className="text-slate-400">Not shared</span>
                   )}
                 </div>
               </div>
               <div>
-                <span className="text-slate-500">Total Activity:</span>
-                <div className="text-cyan-400 mt-0.5">
+                <span className="text-slate-400">Total Activity:</span>
+                <div className="text-blue-600 mt-0.5 font-semibold">
                   {selectedUser.total_messages_sent} msgs / {selectedUser.total_conversations} threads
                 </div>
               </div>
             </div>
 
             {/* Message Stream */}
-            <div className="flex-1 p-5 overflow-y-auto space-y-3">
+            <div className="flex-1 p-6 overflow-y-auto space-y-3.5">
               {loadingMessages ? (
-                <div className="h-full flex items-center justify-center text-xs font-mono text-cyan-400">
+                <div className="h-full flex items-center justify-center text-xs font-semibold text-blue-600">
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                     Fetching message history...
                   </div>
                 </div>
               ) : userMessages.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-xs font-mono text-slate-500">
+                <div className="h-full flex items-center justify-center text-xs font-medium text-slate-400">
                   No messages recorded in database for this student.
                 </div>
               ) : (
@@ -460,16 +462,16 @@ export default function TelegramUsersPage() {
                         isUser ? "items-end" : "items-start"
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 mb-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-400 mb-1">
                         <span>{isUser ? "Student (Telegram)" : "AIVA Bot"}</span>
                         <span>•</span>
                         <span>{new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs font-sans leading-relaxed ${
+                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs font-sans leading-relaxed shadow-sm ${
                           isUser
-                            ? "bg-cyan-500/20 text-cyan-100 border border-cyan-500/30 rounded-tr-none"
-                            : "bg-slate-900 text-slate-200 border border-slate-800 rounded-tl-none"
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none"
+                            : "glass-card text-slate-800 rounded-tl-none border border-white/90"
                         }`}
                       >
                         {m.content}

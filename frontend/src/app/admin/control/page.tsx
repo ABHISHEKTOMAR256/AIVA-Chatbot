@@ -208,21 +208,21 @@ export default function ChatbotControlPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Control Room Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.25)]">
-            <Bot className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-[32px] glass-card shadow-[0_20px_50px_rgba(90,115,210,0.1)]">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_10px_20px_rgba(59,130,246,0.35)] shrink-0">
+            <Bot className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               Chatbot Control Center
               {isGuest && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
                   Guest Preview
                 </span>
               )}
             </h1>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs font-semibold text-slate-500">
               Direct administrative overrides, Telegram dispatch, and human takeover controls
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function ChatbotControlPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => loadConversations()}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5"
+            className="px-4 py-2 rounded-2xl glass-pill hover:bg-white text-slate-700 text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh</span>
@@ -242,42 +242,44 @@ export default function ChatbotControlPage() {
       {/* Main Dual-Panel Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
         {/* Left Column: Active Conversations Selector (4 cols) */}
-        <div className="lg:col-span-4 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+        <div className="lg:col-span-4 rounded-[32px] glass-card flex flex-col overflow-hidden shadow-[0_20px_50px_rgba(90,115,210,0.1)]">
+          <div className="p-4 border-b border-white/60 flex items-center justify-between bg-white/40">
+            <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
               Active Threads ({conversations.length})
             </span>
-            <span className="text-[10px] font-mono text-cyan-400">Telegram & Web</span>
+            <span className="text-[10px] font-bold text-blue-600 px-2 py-0.5 rounded-full bg-blue-50">
+              Telegram Live
+            </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
             {conversations.map((c) => {
               const isSelected = selectedConvId === String(c.id);
               return (
                 <div
                   key={c.id}
                   onClick={() => setSelectedConvId(String(c.id))}
-                  className={`p-3 rounded-xl transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-cyan-500/15 border border-cyan-500/40 text-cyan-200 shadow-[0_0_15px_rgba(0,240,255,0.1)]"
-                      : "hover:bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-transparent"
+                      ? "bg-blue-500/10 border-2 border-blue-500 text-slate-900 shadow-sm"
+                      : "hover:bg-white/60 text-slate-600 border border-transparent glass-card-hover"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-semibold text-xs text-white truncate">
+                    <span className="font-extrabold text-xs text-slate-900 truncate">
                       {c.user_name || "Telegram User"}
                     </span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                         c.handling_mode === "human"
-                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                          : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-blue-100 text-blue-700"
                       }`}
                     >
                       {c.handling_mode === "human" ? "HUMAN MODE" : "AI MODE"}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 truncate">
+                  <p className="text-[11px] font-medium text-slate-500 truncate">
                     {c.last_message_text || "No preview"}
                   </p>
                 </div>
@@ -287,21 +289,21 @@ export default function ChatbotControlPage() {
         </div>
 
         {/* Right Column: Interactive Chat Stream & Control Deck (8 cols) */}
-        <div className="lg:col-span-8 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl flex flex-col overflow-hidden">
+        <div className="lg:col-span-8 rounded-[32px] glass-card flex flex-col overflow-hidden shadow-[0_20px_50px_rgba(90,115,210,0.1)]">
           {/* Thread Header with Mode Controls */}
-          <div className="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-950/40">
+          <div className="p-4 border-b border-white/60 flex flex-wrap items-center justify-between gap-3 bg-white/40">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-white">
+                <span className="font-extrabold text-sm text-slate-900">
                   {convDetail?.conversation.user_name || "Select a conversation"}
                 </span>
                 {convDetail?.conversation.telegram_username && (
-                  <span className="text-xs font-mono text-cyan-400">
+                  <span className="text-xs font-semibold text-blue-600">
                     @{convDetail.conversation.telegram_username}
                   </span>
                 )}
               </div>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] font-medium text-slate-500">
                 Channel: {convDetail?.conversation.platform?.toUpperCase() || "TELEGRAM"} • Messages: {convDetail?.messages.length || 0}
               </span>
             </div>
@@ -312,7 +314,7 @@ export default function ChatbotControlPage() {
                 <button
                   onClick={() => handleModeSwitch("ai")}
                   disabled={modeLoading}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-mono flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-1.5 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
                   <Bot className="w-3.5 h-3.5" />
                   <span>Return to AI Mode</span>
@@ -321,7 +323,7 @@ export default function ChatbotControlPage() {
                 <button
                   onClick={() => handleModeSwitch("human")}
                   disabled={modeLoading}
-                  className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-mono flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>Take Over (Human Mode)</span>
@@ -331,7 +333,7 @@ export default function ChatbotControlPage() {
           </div>
 
           {/* Chronological Message Stream */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-[380px] max-h-[480px]">
+          <div className="flex-1 p-5 overflow-y-auto space-y-3 min-h-[380px] max-h-[480px] custom-scrollbar bg-white/20">
             {convDetail?.messages.map((m: any) => {
               const isUser = m.sender_type === "user";
               const isStaff = m.sender_type === "staff";
@@ -348,7 +350,7 @@ export default function ChatbotControlPage() {
                       : "items-center"
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 mb-1 text-[10px] font-mono text-slate-400">
+                  <div className="flex items-center gap-1.5 mb-1 text-[10px] font-semibold text-slate-400">
                     <span>
                       {isUser ? "Student" : isStaff ? "Staff Admin" : isSystem ? "System" : "AIVA Assistant"}
                     </span>
@@ -357,14 +359,14 @@ export default function ChatbotControlPage() {
                   </div>
 
                   <div
-                    className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
+                    className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed font-medium ${
                       isUser
-                        ? "bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none"
+                        ? "bg-white/95 border border-white text-slate-800 rounded-tl-none shadow-sm"
                         : isStaff
-                        ? "bg-gradient-to-r from-violet-600 to-cyan-600 text-white font-medium rounded-tr-none shadow-[0_0_15px_rgba(0,240,255,0.2)]"
+                        ? "btn-luminous-primary text-white rounded-tr-none shadow-md"
                         : isSystem
-                        ? "bg-amber-950/40 border border-amber-500/30 text-amber-300 text-center"
-                        : "bg-cyan-950/60 border border-cyan-500/30 text-cyan-200 rounded-tr-none"
+                        ? "bg-amber-50 border border-amber-200 text-amber-800 text-center rounded-xl"
+                        : "bg-gradient-to-tr from-cyan-600 to-blue-600 text-white rounded-tr-none shadow-sm"
                     }`}
                   >
                     {m.content}
@@ -376,15 +378,15 @@ export default function ChatbotControlPage() {
           </div>
 
           {/* Interactive Input Form for Manual Replies */}
-          <div className="p-4 border-t border-slate-800 bg-slate-950/60">
+          <div className="p-4 border-t border-white/60 bg-white/60">
             {sendError && (
-              <div className="mb-2 p-2 rounded-lg bg-red-950/60 border border-red-500/30 text-red-300 text-xs font-mono flex items-center gap-2">
+              <div className="mb-2 p-2.5 rounded-2xl bg-red-100 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{sendError}</span>
               </div>
             )}
             {sendSuccess && (
-              <div className="mb-2 p-2 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2">
+              <div className="mb-2 p-2.5 rounded-2xl bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{sendSuccess}</span>
               </div>
@@ -400,13 +402,13 @@ export default function ChatbotControlPage() {
                     ? "Guest Mode: Sign in to send manual replies to Telegram..."
                     : "Type manual reply to Telegram user..."
                 }
-                className="flex-1 bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-colors"
+                className="flex-1 glass-input rounded-full px-4 py-2.5 text-xs font-medium placeholder-slate-400"
               />
 
               <button
                 type="submit"
                 disabled={isSending || !replyText.trim()}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all disabled:opacity-50"
+                className="px-6 py-2.5 rounded-full btn-luminous-primary font-bold text-xs flex items-center gap-1.5 shadow-md disabled:opacity-50 cursor-pointer"
               >
                 {isGuest ? (
                   <>

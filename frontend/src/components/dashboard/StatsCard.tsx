@@ -26,24 +26,24 @@ export function StatsCard({
   };
 
   return (
-    <Card className="p-5 hover:shadow-md transition-shadow">
+    <div className="glass-card glass-card-hover rounded-3xl p-6 transition-all border border-white/80 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
             {title}
           </p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-3xl font-extrabold text-slate-900 mt-1 font-mono">{value}</p>
         </div>
-        <div className={`p-3 rounded-xl border ${colorMap[color]}`}>
+        <div className={`p-3 rounded-2xl border ${colorMap[color]} shadow-sm`}>
           {icon}
         </div>
       </div>
       {(description || trend) && (
-        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
           <span>{description}</span>
           {trend && <span className="font-semibold text-emerald-600">{trend}</span>}
         </div>
       )}
-    </Card>
+    </div>
   );
 }

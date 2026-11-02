@@ -55,78 +55,80 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-luminous-mesh flex flex-col justify-between text-slate-900">
       {/* Top Navbar */}
-      <header className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
-            <Bot className="w-6 h-6" />
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 pt-4">
+        <header className="glass-card rounded-full px-6 py-3 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+              <Bot className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent block leading-tight">
+                AIVA
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold tracking-wider block uppercase">
+                AI Telegram &amp; Hostel Core
+              </span>
+            </div>
           </div>
-          <div>
-            <span className="text-xl font-black bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent block leading-tight">
-              AIVA
-            </span>
-            <span className="text-[10px] text-gray-500 font-medium tracking-wide block uppercase">
-              Hostel Virtual Assistant
-            </span>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full glass-card hover:bg-white text-blue-600 shadow-sm transition-all"
+            >
+              <Shield className="w-3.5 h-3.5 text-blue-600" />
+              <span>3D Control Center</span>
+            </Link>
+
+            <a
+              href={`https://t.me/${telegramBotUser}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full glass-card hover:bg-white text-blue-700 shadow-sm transition-all"
+            >
+              <Send className="w-3.5 h-3.5 text-blue-600" />
+              <span>Telegram Bot</span>
+            </a>
+
+            <button
+              onClick={handleGoogleSignIn}
+              className="btn-luminous-primary rounded-full text-xs font-semibold px-5 py-2 cursor-pointer shadow-md"
+            >
+              Sign In with Google
+            </button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#0b0f19] text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.15)] transition-all font-mono"
-          >
-            <Shield className="w-3.5 h-3.5 text-cyan-400" />
-            3D Control Center
-          </Link>
-
-          <a
-            href={`https://t.me/${telegramBotUser}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-          >
-            <Send className="w-3.5 h-3.5" />
-            Telegram Bot
-          </a>
-
-          <Button
-            onClick={handleGoogleSignIn}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold px-4 py-2 shadow-sm"
-          >
-            Sign In with Google
-          </Button>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* Hero Section */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
         {authError && (
-          <div className="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs sm:text-sm font-medium flex items-center justify-between gap-3 text-left shadow-sm">
+          <div className="mb-8 p-4 rounded-3xl bg-amber-500/15 border border-amber-500/30 text-amber-900 text-xs sm:text-sm font-medium flex items-center justify-between gap-3 text-left shadow-sm">
             <span>{authError}</span>
             <button
               onClick={() => setAuthError(null)}
-              className="text-amber-700 hover:text-amber-900 font-bold px-2 py-1 text-xs rounded hover:bg-amber-100"
+              className="text-amber-700 hover:text-amber-900 font-bold px-3 py-1 text-xs rounded-full hover:bg-amber-200/50"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold mb-6">
-          <Zap className="w-3.5 h-3.5" />
-          Powered by Local Ollama AI & PostgreSQL
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-blue-700 text-xs font-semibold mb-6 shadow-sm">
+          <Zap className="w-3.5 h-3.5 text-cyan-500" />
+          <span>Powered by Local Ollama AI &amp; Supabase pgvector</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-black text-gray-900 tracking-tight leading-tight sm:leading-none mb-6">
+        <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight leading-tight sm:leading-none mb-6">
           Smarter Hostel Living with{" "}
-          <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 bg-clip-text text-transparent">
-            AIVA Helpdesk
+          <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+            AIVA Core
           </span>
         </h1>
 
-        <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
           Instantly register complaints, ask hostel rules, report lost items, and
           connect with wardens — anytime on Web and Telegram.
         </p>
@@ -135,7 +137,7 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <button
             onClick={handleGoogleSignIn}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-white border border-gray-300 hover:border-gray-400 text-gray-800 font-semibold text-sm shadow-sm hover:shadow transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-full glass-card hover:bg-white text-slate-800 font-semibold text-sm shadow-md transition-all cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -162,7 +164,7 @@ export default function LandingPage() {
             href={`https://t.me/${telegramBotUser}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-sm transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full btn-luminous-primary text-white font-semibold text-sm shadow-md transition-all cursor-pointer"
           >
             <Send className="w-4 h-4" />
             Chat on Telegram
@@ -170,51 +172,51 @@ export default function LandingPage() {
 
           <Link
             href="/admin"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-950 text-cyan-300 border border-cyan-500/40 hover:border-cyan-400 font-semibold text-sm shadow-[0_0_20px_rgba(0,240,255,0.2)] hover:shadow-[0_0_25px_rgba(0,240,255,0.35)] transition-all font-mono"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full glass-card hover:bg-white text-blue-600 font-semibold text-sm shadow-md transition-all"
           >
-            <Shield className="w-4 h-4 text-cyan-400" />
+            <Shield className="w-4 h-4 text-blue-600" />
             3D Admin Center (Guest Mode)
           </Link>
         </div>
 
         {/* Feature Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-left">
-          <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
-              <MessageSquare className="w-5 h-5" />
+          <div className="p-6 rounded-3xl glass-card glass-card-hover">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-600 flex items-center justify-center mb-4">
+              <MessageSquare className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-gray-900 text-sm mb-1">AI Assistant</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h3 className="font-bold text-slate-900 text-base mb-1">AI Assistant</h3>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Trained on hostel rules, FAQs, and mess schedules for fast answers.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-              <AlertCircle className="w-5 h-5" />
+          <div className="p-6 rounded-3xl glass-card glass-card-hover">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center mb-4">
+              <AlertCircle className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-gray-900 text-sm mb-1">Complaint Tracking</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h3 className="font-bold text-slate-900 text-base mb-1">Complaint Tracking</h3>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Unique tracking IDs, real-time technician updates, and status alerts.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
-              <Search className="w-5 h-5" />
+          <div className="p-6 rounded-3xl glass-card glass-card-hover">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center mb-4">
+              <Search className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-gray-900 text-sm mb-1">Lost & Found</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h3 className="font-bold text-slate-900 text-base mb-1">Lost &amp; Found</h3>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Report lost items with privacy-protected verification before claim.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-              <Shield className="w-5 h-5" />
+          <div className="p-6 rounded-3xl glass-card glass-card-hover">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-600 flex items-center justify-center mb-4">
+              <Shield className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-gray-900 text-sm mb-1">Human Handover</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h3 className="font-bold text-slate-900 text-base mb-1">Human Handover</h3>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               Seamlessly escalate complex issues to hostel wardens with 1-click.
             </p>
           </div>
@@ -222,14 +224,14 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+      <footer className="border-t border-white/60 py-6 backdrop-blur-md bg-white/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-500">
           <p>© 2026 AIVA — Artificial Intelligence Virtual Assistant.</p>
           <div className="flex gap-4">
-            <Link href="/dashboard" className="hover:text-gray-900">
+            <Link href="/dashboard" className="hover:text-slate-900 transition-colors">
               Student Dashboard
             </Link>
-            <Link href="/admin" className="hover:text-gray-900">
+            <Link href="/admin" className="hover:text-slate-900 transition-colors">
               Admin Portal
             </Link>
           </div>

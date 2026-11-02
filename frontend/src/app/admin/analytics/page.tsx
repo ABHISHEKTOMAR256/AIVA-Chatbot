@@ -117,30 +117,32 @@ export default function AnalyticsReportsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <BarChart3 className="w-6 h-6 text-cyan-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+              <BarChart3 className="w-5 h-5" />
+            </div>
             AI Analytics & Academic Evaluation
             {isGuest && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+              <span className="text-xs px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 border border-amber-500/30 font-medium">
                 Guest Preview
               </span>
             )}
           </h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">
+          <p className="text-sm text-slate-500 font-medium mt-1">
             Academic evaluation criteria: Minimum 25 genuine user conversations verification and throughput analysis
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-xs font-mono">
+          <div className="flex items-center glass-card p-1 rounded-full shadow-sm">
             {[7, 14, 30].map((d) => (
               <button
                 key={d}
                 onClick={() => setDays(d)}
-                className={`px-3 py-1 rounded-lg transition-all ${
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   days === d
-                    ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {d} Days
@@ -151,7 +153,7 @@ export default function AnalyticsReportsPage() {
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-mono flex items-center gap-2 transition-all cursor-pointer"
+            className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all"
           >
             {isGuest ? <Lock className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
             <span>{exporting ? "Exporting..." : "Export Academic Report"}</span>
@@ -160,41 +162,41 @@ export default function AnalyticsReportsPage() {
       </div>
 
       {/* Academic Milestone Tracker */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-[#0c1222] via-[#09152b] to-[#07101e] border border-cyan-500/30 shadow-xl space-y-4">
+      <div className="glass-card p-7 rounded-3xl relative overflow-hidden space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-              <Award className="w-5 h-5" />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(245,158,11,0.35)]">
+              <Award className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Academic Project Benchmark Verification</h2>
-              <p className="text-xs text-slate-300 font-mono">
-                Requirement: "The bot must be live for evaluation and supported by usage statistics from at least 25 genuine user conversations."
+              <h2 className="text-lg font-bold text-slate-900">Academic Project Benchmark Verification</h2>
+              <p className="text-xs text-slate-500 font-medium">
+                Requirement: &ldquo;The bot must be live for evaluation and supported by usage statistics from at least 25 genuine user conversations.&rdquo;
               </p>
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-2xl font-bold font-mono text-cyan-400">
+            <div className="text-3xl font-extrabold font-mono text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">
               {academicProgress.total_genuine ?? academicProgress.total ?? 0} / {academicProgress.target}
             </div>
-            <div className="text-[11px] font-mono text-slate-400">
+            <div className="text-xs font-semibold text-slate-500">
               {academicProgress.percentage}% verified
             </div>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-3 rounded-full bg-slate-900 border border-slate-800 overflow-hidden">
+        <div className="w-full h-3.5 rounded-full bg-slate-200/70 p-0.5 overflow-hidden">
           <div
             style={{ width: `${Math.min(100, academicProgress.percentage)}%` }}
-            className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all duration-500"
           />
         </div>
 
-        <div className="flex items-center justify-between text-xs font-mono text-slate-400">
+        <div className="flex items-center justify-between text-xs font-medium text-slate-500">
           <span>Formula: Conversations with &ge; 2 user messages</span>
-          <span className={(academicProgress.remaining ?? 25) === 0 ? "text-emerald-400" : "text-amber-400"}>
+          <span className={(academicProgress.remaining ?? 25) === 0 ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
             {(academicProgress.remaining ?? 25) === 0
               ? "Requirement fully achieved for academic review"
               : `${academicProgress.remaining ?? 25} genuine student conversations remaining`}
@@ -203,60 +205,86 @@ export default function AnalyticsReportsPage() {
       </div>
 
       {/* Analytics KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl">
-          <span className="text-xs font-mono text-slate-400 uppercase">Total Volume</span>
-          <div className="text-2xl font-bold text-white font-mono mt-1">
-            {stats?.total_messages_received || 0} In / {stats?.total_bot_replies || 0} Out
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="glass-card glass-card-hover p-6 rounded-3xl space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Volume</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center">
+              <MessageSquare className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-[11px] font-mono text-cyan-400 mt-2">
-            Average response time: {stats?.avg_response_time_ms || 18}ms
+          <div className="text-3xl font-extrabold text-slate-900 font-mono">
+            {stats?.total_messages_received || 0} <span className="text-sm font-medium text-slate-400">In</span> / {stats?.total_bot_replies || 0} <span className="text-sm font-medium text-slate-400">Out</span>
+          </div>
+          <p className="text-xs font-medium text-blue-600 pt-1">
+            Avg latency: {stats?.avg_response_time_ms || 18}ms
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-violet-500/20 backdrop-blur-xl">
-          <span className="text-xs font-mono text-slate-400 uppercase">Active Engagement</span>
-          <div className="text-2xl font-bold text-white font-mono mt-1">
-            {stats?.active_users_7d || 0} Active Users (7d)
+        <div className="glass-card glass-card-hover p-6 rounded-3xl space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Engagement</span>
+            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
+              <Users className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-[11px] font-mono text-violet-300 mt-2">
+          <div className="text-3xl font-extrabold text-slate-900 font-mono">
+            {stats?.active_users_7d || 0} <span className="text-sm font-medium text-slate-400">Users (7d)</span>
+          </div>
+          <p className="text-xs font-medium text-purple-600 pt-1">
             {stats?.active_users_today || 0} interacting today
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-emerald-500/20 backdrop-blur-xl">
-          <span className="text-xs font-mono text-slate-400 uppercase">Delivery Success</span>
-          <div className="text-2xl font-bold text-white font-mono mt-1">
+        <div className="glass-card glass-card-hover p-6 rounded-3xl space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Delivery Success</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-3xl font-extrabold text-slate-900 font-mono">
             {stats?.failed_messages === 0 ? "100%" : "99.8%"}
           </div>
-          <p className="text-[11px] font-mono text-emerald-400 mt-2">
+          <p className="text-xs font-medium text-emerald-600 pt-1">
             0 Telegram webhook dropouts
           </p>
         </div>
       </div>
 
       {/* SVG Interactive Multi-Day Breakdown */}
-      <div className="rounded-2xl bg-[#0b0f19]/80 backdrop-blur-xl border border-cyan-500/20 p-6 space-y-4">
-        <h3 className="text-base font-bold text-white">{days}-Day Throughput Breakdown</h3>
+      <div className="glass-card p-7 rounded-3xl space-y-5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-slate-900">{days}-Day Throughput Breakdown</h3>
+          <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> Received
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Replies
+            </span>
+          </div>
+        </div>
+
         <div className="h-64 w-full relative">
-          <div className="h-full flex items-end justify-between gap-1.5 pt-6 pb-6 border-b border-slate-800">
+          <div className="h-full flex items-end justify-between gap-2 pt-6 pb-6 border-b border-slate-200/80">
             {charts.map((c, i) => {
-              const recHeight = Math.max(4, Math.round(((c.messages_received || 0) / maxVal) * 180));
-              const repHeight = Math.max(4, Math.round(((c.bot_replies || 0) / maxVal) * 180));
+              const recHeight = Math.max(6, Math.round(((c.messages_received || 0) / maxVal) * 180));
+              const repHeight = Math.max(6, Math.round(((c.bot_replies || 0) / maxVal) * 180));
 
               return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group relative">
                   <div className="w-full flex items-end justify-center gap-1 h-48">
                     <div
                       style={{ height: `${recHeight}px` }}
-                      className="w-2 rounded-t bg-cyan-400/80 group-hover:bg-cyan-300 shadow-[0_0_8px_rgba(0,240,255,0.4)] transition-all"
+                      className="w-2.5 rounded-t-full bg-gradient-to-t from-cyan-400 to-cyan-300 shadow-[0_2px_8px_rgba(6,182,212,0.4)] group-hover:brightness-110 transition-all"
                     />
                     <div
                       style={{ height: `${repHeight}px` }}
-                      className="w-2 rounded-t bg-violet-500/80 group-hover:bg-violet-400 shadow-[0_0_8px_rgba(139,92,246,0.4)] transition-all"
+                      className="w-2.5 rounded-t-full bg-gradient-to-t from-blue-600 to-indigo-500 shadow-[0_2px_8px_rgba(37,99,235,0.4)] group-hover:brightness-110 transition-all"
                     />
                   </div>
-                  <span className="text-[9px] font-mono text-slate-500 truncate w-full text-center">
+                  <span className="text-[10px] font-semibold text-slate-400 truncate w-full text-center">
                     {c.label.split(" ")[1] || c.label}
                   </span>
                 </div>

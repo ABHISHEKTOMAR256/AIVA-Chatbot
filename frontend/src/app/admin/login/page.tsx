@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminLogin, ApiError } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
 import { signInWithGooglePopup } from "@/lib/firebase";
-import NeuralOrb from "@/components/3d/NeuralOrb";
+import AivaRobot3D from "@/components/3d/AivaRobot3D";
 import { Shield, Lock, User, ArrowRight, AlertCircle, Bot, Sparkles } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -18,17 +17,6 @@ export default function AdminLoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       const { credential } = await signInWithGooglePopup();
-      document.cookie = `aiva_admin_token=firebase_${credential.user.uid}; path=/; max-age=2592000; SameSite=Lax`;
-      localStorage.setItem("aiva_admin_token", `firebase_${credential.user.uid}`);
-      localStorage.setItem(
-        "aiva_admin_user",
-        JSON.stringify({
-          id: credential.user.uid,
-          email: credential.user.email,
-          full_name: credential.user.displayName,
-          role: "admin",
-        })
-      );
       window.location.href = "/admin";
     } catch (err: any) {
       console.error("Firebase Google popup error:", err);
@@ -67,58 +55,47 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex items-center justify-center relative overflow-hidden px-4">
-      {/* Background ambient futuristic grid & radial flares */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(0,240,255,0.15),rgba(255,255,255,0))] pointer-events-none" />
-      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Futuristic Grid Pattern Overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(#00f0ff 1px, transparent 1px), linear-gradient(90deg, #00f0ff 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
+    <div className="min-h-screen bg-luminous-mesh text-slate-800 flex items-center justify-center relative overflow-hidden px-4 py-8">
+      {/* Background ambient radial flares */}
+      <div className="absolute top-1/4 -left-48 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Glassmorphic Card */}
       <div className="relative z-10 w-full max-w-md">
-        {/* 3D Orb Centerpiece */}
-        <div className="flex flex-col items-center justify-center -mb-6">
-          <NeuralOrb size={200} />
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-xs font-mono tracking-wider shadow-[0_0_15px_rgba(0,240,255,0.2)] -mt-6">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            AIVA COMMAND CENTER
+        {/* 3D Robot Centerpiece */}
+        <div className="flex flex-col items-center justify-center -mb-8">
+          <AivaRobot3D width={280} height={210} />
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full glass-pill text-blue-700 text-xs font-bold tracking-wider shadow-sm -mt-6 z-20">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            AIVA COMMAND CORE
           </div>
         </div>
 
-        <div className="bg-[#0b0f19]/80 backdrop-blur-2xl border border-cyan-500/20 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,240,255,0.08)] mt-4">
+        <div className="glass-card rounded-[32px] p-8 sm:p-9 shadow-[0_25px_60px_rgba(90,115,210,0.18)] mt-4">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900">
               Administrator Access
             </h1>
-            <p className="text-xs text-slate-400 mt-1 font-mono">
+            <p className="text-xs text-slate-500 mt-1 font-semibold">
               Authenticate to manage live Telegram bot & telemetry
             </p>
           </div>
 
           {error && (
-            <div className="mb-5 p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-2xl bg-red-50/80 border border-red-300 text-red-700 text-xs flex items-start gap-2.5 shadow-sm">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Admin Username / Email
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <User className="w-4 h-4 text-cyan-400/70" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-4 h-4 text-blue-500" />
                 </div>
                 <input
                   type="text"
@@ -126,18 +103,18 @@ export default function AdminLoginPage() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="admin@aiva.local"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-mono"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl glass-input text-sm text-slate-800 placeholder-slate-400"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Secure Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="w-4 h-4 text-cyan-400/70" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4 text-blue-500" />
                 </div>
                 <input
                   type="password"
@@ -145,7 +122,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all font-mono"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl glass-input text-sm text-slate-800 placeholder-slate-400"
                 />
               </div>
             </div>
@@ -153,11 +130,11 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-semibold shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_28px_rgba(0,240,255,0.6)] hover:brightness-110 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full mt-2 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 btn-luminous-primary shadow-[0_10px_24px_rgba(37,99,235,0.4)] disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Verifying Credentials...</span>
                 </div>
               ) : (
@@ -172,10 +149,10 @@ export default function AdminLoginPage() {
           {/* Divider */}
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-800" />
+              <div className="w-full border-t border-slate-200" />
             </div>
-            <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-wider">
-              <span className="bg-[#0b0f19] px-2 text-slate-500">
+            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-wider">
+              <span className="bg-white/80 px-3 py-0.5 rounded-full text-slate-500">
                 Or authenticate with
               </span>
             </div>
@@ -185,7 +162,7 @@ export default function AdminLoginPage() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full py-2.5 px-4 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-slate-200 flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-sm hover:shadow"
+            className="w-full py-3 px-4 rounded-2xl glass-pill hover:bg-white text-xs font-bold text-slate-700 flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm hover:shadow"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -208,9 +185,9 @@ export default function AdminLoginPage() {
             <span>Sign In with Google</span>
           </button>
 
-          <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-            <span className="flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-cyan-500/70" />
+          <div className="mt-6 pt-4 border-t border-white/60 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span className="flex items-center gap-1.5 text-blue-700">
+              <Shield className="w-3.5 h-3.5" />
               Bcrypt & Argon2 Protected
             </span>
             <span>v2.4 Neural Core</span>

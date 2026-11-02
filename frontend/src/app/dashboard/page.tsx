@@ -63,43 +63,43 @@ export default function StudentDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-700 rounded-2xl p-6 sm:p-8 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="glass-card rounded-3xl p-6 sm:p-8 text-slate-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-white/80 shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-semibold backdrop-blur-sm mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-blue-50 border border-blue-200/60 rounded-full text-xs font-semibold text-blue-700 mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-500" />
             <span>AI Virtual Assistant Ready</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             Hostel Helpdesk Dashboard
           </h1>
-          <p className="text-sm text-indigo-100 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-xl">
             Welcome! File issues, track complaint resolution, find lost items, or
             ask questions 24/7.
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Link href="/chat">
-            <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-sm">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Ask AIVA
-            </Button>
+            <button className="px-5 py-2.5 rounded-full glass-card hover:bg-white text-blue-600 font-semibold text-xs shadow-sm flex items-center gap-2 cursor-pointer transition-all">
+              <MessageSquare className="w-4 h-4" />
+              <span>Ask AIVA</span>
+            </button>
           </Link>
           <Link href="/complaints">
-            <Button className="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold shadow-sm">
-              <Plus className="w-4 h-4 mr-1" />
-              File Complaint
-            </Button>
+            <button className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 cursor-pointer">
+              <Plus className="w-4 h-4" />
+              <span>File Complaint</span>
+            </button>
           </Link>
         </div>
       </div>
 
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatsCard
           title="Total Complaints"
           value={stats.total_complaints}
-          icon={<AlertCircle className="w-5 h-5 text-indigo-600" />}
+          icon={<AlertCircle className="w-5 h-5 text-blue-600" />}
           description="Registered by you"
           color="indigo"
         />
@@ -120,7 +120,7 @@ export default function StudentDashboardPage() {
         <StatsCard
           title="Conversations"
           value={stats.total_conversations}
-          icon={<MessageSquare className="w-5 h-5 text-blue-600" />}
+          icon={<MessageSquare className="w-5 h-5 text-cyan-600" />}
           description="Web & Telegram sessions"
           color="blue"
         />
@@ -130,12 +130,12 @@ export default function StudentDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-gray-900">
+            <h2 className="text-base font-bold text-slate-900">
               Recent Helpdesk Chats
             </h2>
             <Link
               href="/chat"
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800"
             >
               Open Chat Room →
             </Link>
@@ -145,44 +145,44 @@ export default function StudentDashboardPage() {
 
         {/* Quick Help & Lost and Found link */}
         <div className="space-y-4">
-          <h2 className="text-base font-bold text-gray-900">Quick Links</h2>
-          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <h2 className="text-base font-bold text-slate-900">Quick Links</h2>
+          <div className="glass-card rounded-3xl p-6 space-y-3.5 border border-white/80">
             <Link
               href="/complaints"
-              className="p-3 bg-gray-50 hover:bg-indigo-50 rounded-lg flex items-center justify-between group transition-colors block"
+              className="p-3.5 bg-white/60 hover:bg-white rounded-2xl flex items-center justify-between group transition-all block border border-white/70 shadow-sm"
             >
               <div>
-                <p className="text-xs font-bold text-gray-800 group-hover:text-indigo-700">
+                <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
                   Track My Complaints
                 </p>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-[11px] text-slate-400 font-medium">
                   Check live technician assignment
                 </p>
               </div>
-              <AlertCircle className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
+              <AlertCircle className="w-4 h-4 text-slate-400 group-hover:text-blue-600" />
             </Link>
 
             <Link
               href="/lost-found"
-              className="p-3 bg-gray-50 hover:bg-emerald-50 rounded-lg flex items-center justify-between group transition-colors block"
+              className="p-3.5 bg-white/60 hover:bg-white rounded-2xl flex items-center justify-between group transition-all block border border-white/70 shadow-sm"
             >
               <div>
-                <p className="text-xs font-bold text-gray-800 group-hover:text-emerald-700">
-                  Lost & Found Catalog
+                <p className="text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">
+                  Lost &amp; Found Catalog
                 </p>
-                <p className="text-[11px] text-gray-400">
+                <p className="text-[11px] text-slate-400 font-medium">
                   Report or claim found items
                 </p>
               </div>
-              <Search className="w-4 h-4 text-gray-400 group-hover:text-emerald-600" />
+              <Search className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
             </Link>
 
-            <div className="pt-3 border-t border-gray-100">
-              <p className="text-xs font-semibold text-gray-700 mb-1">
+            <div className="pt-3 border-t border-slate-200/70">
+              <p className="text-xs font-bold text-slate-800 mb-1">
                 Emergency Contact
               </p>
-              <p className="text-xs text-gray-500">
-                Medical & Security: Ext 1008 / +91-11-2345-6708
+              <p className="text-xs text-slate-500 font-medium">
+                Medical &amp; Security: Ext 1008 / +91-11-2345-6708
               </p>
             </div>
           </div>

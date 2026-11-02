@@ -64,21 +64,21 @@ export default function SystemHealthPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.25)]">
-            <Activity className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-card rounded-3xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+            <Activity className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
               System Diagnostics & Error Recovery
               {isGuest && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">
+                <span className="text-xs px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 border border-amber-500/30 font-medium">
                   Guest Preview
                 </span>
               )}
             </h1>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
               Live database latency, Telegram gateway verification, and fault-tolerant failover monitoring
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function SystemHealthPage() {
         <button
           onClick={fetchHealth}
           disabled={testingPing}
-          className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-cyan-300 flex items-center gap-2 transition-all cursor-pointer"
+          className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-md self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${testingPing ? "animate-spin" : ""}`} />
           <span>{testingPing ? "Pinging Stack..." : "Run Diagnostic Ping"}</span>
@@ -95,105 +95,113 @@ export default function SystemHealthPage() {
       </div>
 
       {retrySuccess && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 text-xs font-medium flex items-center gap-2 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <span>{retrySuccess}</span>
         </div>
       )}
 
       {/* 4 Core Pillars */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Database */}
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl space-y-3">
+        <div className="p-6 rounded-3xl glass-card glass-card-hover space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-400 uppercase">PostgreSQL DB</span>
-            <Database className="w-5 h-5 text-cyan-400" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">PostgreSQL DB</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center">
+              <Database className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
             <span>Connected</span>
           </div>
-          <div className="text-xs font-mono text-cyan-300">
+          <div className="text-xs font-medium text-blue-600">
             Latency: <strong>{health?.database_latency_ms ?? 14} ms</strong>
           </div>
         </div>
 
         {/* Telegram Gateway */}
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl space-y-3">
+        <div className="p-6 rounded-3xl glass-card glass-card-hover space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-400 uppercase">Telegram Bot</span>
-            <Radio className="w-5 h-5 text-emerald-400" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Telegram Bot</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+              <Radio className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
             <span>Operational</span>
           </div>
-          <div className="text-xs font-mono text-slate-400">
+          <div className="text-xs font-mono font-medium text-slate-500 truncate">
             @{health?.bot_username || "AIVA_LPU_bot"}
           </div>
         </div>
 
         {/* Inference Core */}
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl space-y-3">
+        <div className="p-6 rounded-3xl glass-card glass-card-hover space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-400 uppercase">AI Inference Core</span>
-            <Cpu className="w-5 h-5 text-violet-400" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Inference Core</span>
+            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
+              <Cpu className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-violet-400" />
+          <div className="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
             <span>Ready</span>
           </div>
-          <div className="text-xs font-mono text-violet-300 truncate">
+          <div className="text-xs font-medium text-purple-600 truncate">
             {health?.model_name || "qwen3:4b / Groq"}
           </div>
         </div>
 
         {/* Error Tracking */}
-        <div className="p-5 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl space-y-3">
+        <div className="p-6 rounded-3xl glass-card glass-card-hover space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-400 uppercase">Failed Operations</span>
-            <AlertTriangle className="w-5 h-5 text-amber-400" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Failed Operations</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-white font-mono">
+          <div className="text-2xl font-extrabold text-slate-900">
             {health?.recent_errors_count ?? 0} errors
           </div>
-          <div className="text-xs font-mono text-emerald-400">
+          <div className="text-xs font-semibold text-emerald-600">
             99.98% Healthy Execution
           </div>
         </div>
       </div>
 
       {/* Fault Recovery Panel */}
-      <div className="p-6 rounded-2xl bg-[#0b0f19]/80 border border-cyan-500/20 backdrop-blur-xl space-y-4">
+      <div className="p-7 rounded-3xl glass-card space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-white">Idempotent Error Recovery & Webhook Queue</h3>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">
+            <h3 className="text-lg font-bold text-slate-900">Idempotent Error Recovery & Webhook Queue</h3>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
               Retryable message queue prevents duplicate Telegram deliveries using unique `telegram_message_id`
             </p>
           </div>
 
           <button
             onClick={handleRetryFailed}
-            className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition-all self-start sm:self-auto cursor-pointer"
+            className="px-5 py-2.5 rounded-full glass-card hover:bg-white text-blue-600 font-semibold text-xs flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer shadow-sm"
           >
-            {isGuest ? <Lock className="w-3.5 h-3.5" /> : <RotateCcw className="w-3.5 h-3.5" />}
+            {isGuest ? <Lock className="w-3.5 h-3.5 text-amber-600" /> : <RotateCcw className="w-3.5 h-3.5" />}
             <span>Re-evaluate Failed Messages</span>
           </button>
         </div>
 
-        <div className="space-y-2 text-xs font-mono text-slate-400 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+        <div className="space-y-3 text-xs font-medium text-slate-600 bg-white/50 p-5 rounded-2xl border border-white/80">
           <div className="flex items-center justify-between">
             <span>Telegram Webhook Retries:</span>
-            <span className="text-emerald-400 font-bold">0 Dropouts</span>
+            <span className="text-emerald-700 font-bold">0 Dropouts</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Storage Bucket Quota (aiva-media):</span>
-            <span className="text-cyan-300 font-bold">&lt; 1% Utilized (Private)</span>
+            <span className="text-blue-700 font-bold">&lt; 1% Utilized (Private)</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Database Connection Pooler:</span>
-            <span className="text-emerald-400 font-bold">Supabase AWS EU Pooler Active</span>
+            <span className="text-emerald-700 font-bold">Supabase AWS EU Pooler Active</span>
           </div>
         </div>
       </div>

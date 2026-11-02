@@ -87,18 +87,20 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-luminous-mesh">
         <Spinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header user={user} />
-      <div className="flex-1 flex">
+    <div className="min-h-screen bg-luminous-mesh flex flex-col text-slate-900">
+      <div className="p-4 max-w-7xl mx-auto w-full">
+        <Header user={user} />
+      </div>
+      <div className="flex-1 flex max-w-7xl mx-auto w-full px-4 pb-6 gap-6">
         <Sidebar user={user} />
-        <main className="flex-1 p-4 sm:p-8 max-w-6xl overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

@@ -17,13 +17,14 @@ import {
   Settings,
   BookOpen,
   LogOut,
+  Search,
+  Bell,
+  CheckCircle2,
+  Lock,
   Menu,
   X,
   ExternalLink,
-  Shield,
-  Lock,
-  Sparkles,
-  Zap,
+  ChevronDown,
 } from "lucide-react";
 import { GuestAuthProvider, useGuestAuth } from "@/components/admin/GuestAuthContext";
 import { getBotHealthStatus } from "@/lib/api";
@@ -35,6 +36,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
 
   const { isAdmin, isGuest, adminUser, openAuthModal, logout } = useGuestAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [botStatus, setBotStatus] = useState<any>({
     bot_online: true,
     bot_username: "AIVA_LPU_bot",
@@ -53,72 +55,69 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // The 12 core navigation sections for AIVA Chatbot Admin Dashboard
+  // The core navigation sections for AIVA Chatbot Admin Dashboard
   const navItems = [
-    { label: "Overview", href: "/admin", icon: LayoutDashboard },
-    { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Conversations", href: "/admin/conversations", icon: MessageSquare },
-    { label: "Chatbot Control", href: "/admin/control", icon: Bot },
-    { label: "Manual Operations", href: "/admin/operations", icon: FileText },
-    { label: "Human Handover", href: "/admin/handovers", icon: ShieldAlert },
-    { label: "Media Gallery", href: "/admin/media", icon: ImageIcon },
-    { label: "Knowledge & RAG", href: "/admin/knowledge", icon: BookOpen },
-    { label: "Sessions", href: "/admin/sessions", icon: Clock },
+    { label: "Home", href: "/admin", icon: LayoutDashboard },
     { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { label: "Chat History", href: "/admin/conversations", icon: MessageSquare },
+    { label: "Chatbot Control", href: "/admin/control", icon: Bot },
+    { label: "Operations", href: "/admin/operations", icon: FileText },
+    { label: "Users", href: "/admin/users", icon: Users },
+    { label: "Handover", href: "/admin/handovers", icon: ShieldAlert },
+    { label: "Media Gallery", href: "/admin/media", icon: ImageIcon },
+    { label: "Knowledge RAG", href: "/admin/knowledge", icon: BookOpen },
+    { label: "Sessions", href: "/admin/sessions", icon: Clock },
     { label: "System Health", href: "/admin/health", icon: Activity },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col md:flex-row antialiased font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Mobile Header Bar */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-[#0b0f19] border-b border-cyan-500/20">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
-            <Bot className="w-5 h-5" />
+    <div className="min-h-screen bg-luminous-mesh text-slate-800 p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-4 lg:gap-6 antialiased selection:bg-blue-500/20 selection:text-blue-900">
+      {/* Mobile Top Header */}
+      <div className="md:hidden flex items-center justify-between p-4 glass-card rounded-2xl">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white shadow-md">
+            <span className="font-black text-sm tracking-tighter">A</span>
           </div>
-          <span className="font-bold tracking-tight text-white font-mono text-sm">
-            AIVA <span className="text-cyan-400">CONTROL</span>
+          <span className="font-extrabold text-base tracking-tight text-slate-900">
+            AIVA <span className="text-blue-600">CORE</span>
           </span>
         </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300"
+          className="p-2 rounded-xl glass-pill text-slate-700"
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Futuristic Sidebar */}
+      {/* Floating Skeuomorphic Frosted Glass Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 z-40 h-screen w-64 bg-[#070b14]/95 md:bg-[#070b14]/80 backdrop-blur-2xl border-r border-cyan-500/20 flex flex-col justify-between transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        className={`fixed md:sticky top-4 lg:top-6 z-40 h-[calc(100vh-2rem)] lg:h-[calc(100vh-3rem)] w-64 glass-card rounded-[32px] p-4 flex flex-col justify-between transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-[120%] md:translate-x-0"
         }`}
       >
-        <div className="overflow-y-auto flex-1">
-          {/* Logo Brand Header */}
-          <div className="p-5 border-b border-slate-800/80 flex items-center gap-3">
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* Top 3D Logo Mark */}
+          <div className="px-3 pt-2 pb-5 flex items-center gap-3 border-b border-white/60">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold shadow-[0_0_15px_rgba(0,240,255,0.4)]">
-                <Bot className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-[0_10px_20px_rgba(59,130,246,0.35)] border border-white/60">
+                <span className="font-black text-lg tracking-tighter">▲</span>
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#070b14]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white shadow-sm" />
             </div>
             <div>
-              <div className="font-bold tracking-tight text-sm text-white font-mono flex items-center gap-1.5">
-                AIVA 3D CORE
-                <span className="px-1.5 py-0.5 text-[9px] rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  {isAdmin ? "ADMIN" : "GUEST"}
-                </span>
+              <div className="font-black text-xl tracking-tight text-slate-900 leading-none">
+                AIVA
               </div>
-              <div className="text-[11px] text-slate-400 font-mono">
-                Chatbot Control Center
+              <div className="text-[10px] font-semibold text-slate-500 tracking-wider uppercase mt-1">
+                AI Management Core
               </div>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="p-3 space-y-1">
+          {/* Navigation Items (Scrollable Capsule List) */}
+          <nav className="flex-1 overflow-y-auto custom-scrollbar py-3 space-y-1.5 pr-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -131,15 +130,15 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                  className={`flex items-center gap-3.5 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_15px_rgba(0,240,255,0.15)]"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 border border-transparent"
+                      ? "btn-luminous-primary shadow-[0_8px_20px_rgba(37,99,235,0.38)]"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-white/60 glass-card-hover"
                   }`}
                 >
                   <Icon
                     className={`w-4 h-4 shrink-0 ${
-                      isActive ? "text-cyan-400" : "text-slate-500"
+                      isActive ? "text-white" : "text-slate-500"
                     }`}
                   />
                   <span>{item.label}</span>
@@ -147,122 +146,132 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-        </div>
 
-        {/* Sidebar Footer & Operating Mode Badge */}
-        <div className="p-4 border-t border-slate-800/80 space-y-3 shrink-0">
-          {/* Bot Connection Quick Pill */}
-          <div className="p-2.5 rounded-xl bg-slate-900/70 border border-cyan-500/20 flex items-center justify-between text-[11px] font-mono">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-slate-300">@{botStatus.bot_username || "AIVA_LPU_bot"}</span>
-            </div>
+          {/* Bottom User Profile Capsule */}
+          <div className="pt-3 border-t border-white/60 shrink-0">
+            {isAdmin ? (
+              <div className="p-3 rounded-2xl glass-card flex items-center justify-between gap-2 shadow-sm">
+                <div className="flex items-center gap-2.5 overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md shrink-0 border border-white/70">
+                    {(adminUser?.full_name?.[0] || adminUser?.email?.[0] || "A").toUpperCase()}
+                  </div>
+                  <div className="truncate">
+                    <div className="text-xs font-bold text-slate-900 truncate">
+                      {adminUser?.full_name || adminUser?.email?.split("@")[0] || "Administrator"}
+                    </div>
+                    <div className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider">
+                      {adminUser?.role || "Super Admin"}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={logout}
+                  title="Logout"
+                  className="p-1.5 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="p-3 rounded-2xl glass-card flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">
+                    GP
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800">Guest Visitor</div>
+                    <div className="text-[10px] text-slate-500 font-medium">Preview Mode</div>
+                  </div>
+                </div>
+                <Link
+                  href={`/admin/login?redirect=${encodeURIComponent(pathname)}`}
+                  className="px-3 py-1.5 rounded-xl btn-luminous-primary text-[10px] font-bold shadow-md"
+                >
+                  Sign In
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 flex flex-col space-y-4 lg:space-y-6">
+        {/* Top Floating Glass Header (Search + Status + Actions) */}
+        <header className="glass-card rounded-[28px] p-3 sm:px-6 sm:py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-[0_12px_32px_rgba(90,115,210,0.08)]">
+          {/* Frosted Floating Search Pill */}
+          <div className="relative w-full sm:w-80 lg:w-96">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search anything..."
+              className="w-full pl-10 pr-4 py-2 rounded-full glass-input text-xs font-medium placeholder-slate-400"
+            />
+          </div>
+
+          {/* Right Status Indicators & Quick Actions */}
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            {/* Telegram Bot Link Pill */}
             <a
               href={`https://t.me/${botStatus.bot_username || "AIVA_LPU_bot"}`}
               target="_blank"
               rel="noreferrer"
-              className="text-cyan-400 hover:text-cyan-300"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-pill text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors shadow-sm"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Bot className="w-3.5 h-3.5 text-blue-600" />
+              <span>@{botStatus.bot_username || "AIVA_LPU_bot"}</span>
             </a>
-          </div>
 
-          {/* Mode Switcher / User Profile */}
-          {isAdmin ? (
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                  {(adminUser?.email?.[0] || "A").toUpperCase()}
-                </div>
-                <div className="truncate">
-                  <div className="text-xs font-medium text-slate-200 truncate">
-                    {adminUser?.full_name || adminUser?.email || "Super Admin"}
-                  </div>
-                  <div className="text-[10px] text-cyan-400 font-mono capitalize">
-                    {adminUser?.role || "Administrator"}
-                  </div>
-                </div>
-              </div>
-
+            {/* Notification Bell Pill */}
+            <div className="relative">
               <button
-                onClick={logout}
-                title="Logout"
-                className="p-2 rounded-lg bg-slate-900/80 hover:bg-red-950/60 border border-slate-800 hover:border-red-500/40 text-slate-400 hover:text-red-400 transition-colors"
+                onClick={() => {}}
+                className="w-9 h-9 rounded-full glass-pill flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer shadow-sm"
               >
-                <LogOut className="w-4 h-4" />
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 shadow-sm" />
               </button>
             </div>
-          ) : (
-            <div className="p-2.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span className="text-[11px] text-cyan-300 font-mono font-medium">Guest Mode</span>
-              </div>
-              <Link
-                href={`/admin/login?redirect=${encodeURIComponent(pathname)}`}
-                className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-[10px] tracking-wide"
-              >
-                Sign In
-              </Link>
-            </div>
-          )}
-        </div>
-      </aside>
 
-      {/* Main Content Viewport */}
-      <main className="flex-1 min-w-0 flex flex-col overflow-y-auto">
-        {/* Top Telemetry Header & Guest Alert Banner */}
-        <header className="sticky top-0 z-30 bg-[#070b14]/90 backdrop-blur-xl border-b border-slate-800/80 flex flex-col">
-          {/* Guest Mode Banner when not logged in */}
-          {isGuest && (
-            <div className="px-4 sm:px-6 py-2 bg-gradient-to-r from-amber-500/15 via-cyan-500/15 to-violet-500/15 border-b border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2 text-slate-300">
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-bold tracking-wider uppercase shrink-0">
-                  Guest Preview
-                </span>
-                <span>
-                  You are previewing AIVA Chatbot Control Center with demonstration data. Real administrative actions require authentication.
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => openAuthModal("Unlock Full Admin Access")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-mono text-[11px] font-semibold transition-colors"
-                >
-                  <Lock className="w-3 h-3" />
-                  <span>Authenticate</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="h-14 px-6 flex items-center justify-between">
-            <div className="flex items-center gap-3 text-xs font-mono">
-              <span className="text-slate-500">Status:</span>
-              <span className="px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 flex items-center gap-1.5 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                Telegram Polling Online
-              </span>
-              <span className="hidden sm:inline-flex px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-[11px]">
-                DB Latency: {botStatus.database_latency_ms || 14}ms
-              </span>
+            {/* Online Status Pill */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-pill text-xs font-semibold text-emerald-700 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              <span>Online</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Link
-                href="/admin/conversations"
-                className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/30 px-2.5 py-1 rounded-lg transition-all"
-              >
-                <Activity className="w-3.5 h-3.5" />
-                <span>Live Feed</span>
-              </Link>
+            {/* Profile Avatar Pill */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 via-indigo-500 to-cyan-400 text-white font-bold text-xs flex items-center justify-center shadow-md border-2 border-white">
+              {(adminUser?.full_name?.[0] || adminUser?.email?.[0] || "A").toUpperCase()}
             </div>
           </div>
         </header>
 
-        {/* Page Content Body */}
-        <div className="p-4 sm:p-6 lg:p-8 flex-1">{children}</div>
-      </main>
+        {/* Guest Mode Alert Banner */}
+        {isGuest && (
+          <div className="px-5 py-3 rounded-2xl glass-card border border-amber-300/60 bg-amber-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
+            <div className="flex items-center gap-2 text-slate-700">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-[10px] tracking-wider uppercase shrink-0 shadow-sm">
+                GUEST PREVIEW
+              </span>
+              <span>
+                You are previewing AIVA with demonstration data. Authenticate to manage live Telegram bot & data.
+              </span>
+            </div>
+            <button
+              onClick={() => openAuthModal("Full Administrator Access")}
+              className="self-start sm:self-auto px-4 py-1.5 rounded-xl btn-luminous-primary text-xs font-bold shrink-0 cursor-pointer"
+            >
+              Sign In to Unlock
+            </button>
+          </div>
+        )}
+
+        {/* Page Children Content */}
+        <main className="flex-1 min-w-0">{children}</main>
+      </div>
     </div>
   );
 }

@@ -45,37 +45,37 @@ export default function LostFoundPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 glass-card rounded-3xl border border-white/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Lost & Found Desk
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Lost &amp; Found Desk
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Search reported hostel items or submit reports for misplaced belongings.
           </p>
         </div>
 
-        <Button
+        <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm text-xs font-semibold px-4 py-2.5 flex items-center gap-2"
+          className="btn-luminous-primary rounded-full text-xs font-semibold px-5 py-2.5 flex items-center gap-2 shadow-md cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          Report Lost / Found Item
-        </Button>
+          <span>Report Lost / Found Item</span>
+        </button>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-center gap-4 p-4 glass-card rounded-3xl border border-white/80 shadow-sm">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search items by name, color, or location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 shadow-sm"
+            className="w-full text-xs pl-10 pr-4 py-2.5 glass-input rounded-full outline-none transition-colors"
           />
         </div>
 
@@ -84,10 +84,10 @@ export default function LostFoundPage() {
             <button
               key={t}
               onClick={() => setTypeFilter(t)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-colors flex-1 sm:flex-initial ${
+              className={`px-4 py-2 rounded-full text-xs font-semibold capitalize transition-all cursor-pointer ${
                 typeFilter === t
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white shadow-sm"
+                  : "glass-card text-slate-600 hover:text-slate-900"
               }`}
             >
               {t === "all" ? "All Items" : t}
@@ -102,18 +102,19 @@ export default function LostFoundPage() {
           <Spinner size="lg" />
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-md mx-auto">
-          <Search className="w-12 h-12 text-gray-300 mx-auto mb-3 stroke-1" />
-          <h3 className="font-bold text-gray-800 text-sm">No items found</h3>
-          <p className="text-xs text-gray-500 mt-1 mb-6">
+        <div className="glass-card rounded-3xl p-12 text-center max-w-md mx-auto border border-white/80 shadow-sm space-y-2">
+          <Search className="w-12 h-12 text-slate-300 mx-auto mb-3 stroke-1" />
+          <h3 className="font-bold text-slate-800 text-sm">No items found</h3>
+          <p className="text-xs text-slate-500 mt-1 mb-6 font-medium">
             No lost or found items matched your search criteria.
           </p>
-          <Button
+          <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-indigo-600 text-white text-xs font-semibold"
+            className="btn-luminous-primary px-5 py-2.5 rounded-full text-xs font-semibold cursor-pointer shadow-md inline-flex items-center gap-1.5"
           >
-            <Plus className="w-4 h-4 mr-1" /> Submit a Report
-          </Button>
+            <Plus className="w-4 h-4" />
+            <span>Submit a Report</span>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

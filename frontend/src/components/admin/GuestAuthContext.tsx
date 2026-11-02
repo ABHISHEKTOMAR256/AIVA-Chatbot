@@ -128,67 +128,68 @@ export function GuestAuthProvider({ children }: { children: React.ReactNode }) {
 
       {/* Guest Authentication Interceptor Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-[#0b0f19] border border-cyan-500/30 rounded-2xl p-6 sm:p-7 shadow-[0_0_60px_rgba(0,240,255,0.15)] text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md glass-card rounded-[32px] p-6 sm:p-8 shadow-[0_30px_70px_rgba(90,115,210,0.25)] text-slate-800 border border-white/80">
             {/* Ambient Corner Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-36 h-36 bg-blue-400/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-36 h-36 bg-purple-400/20 rounded-full blur-2xl pointer-events-none" />
 
             <button
               onClick={closeAuthModal}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 p-1.5 rounded-full glass-pill transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.25)]">
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-[0_10px_20px_rgba(59,130,246,0.35)] shrink-0">
                 <Lock className="w-6 h-6" />
               </div>
               <div>
-                <span className="text-[10px] font-mono tracking-widest uppercase text-cyan-400 font-semibold block">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-blue-600 block">
                   Security Access Control
                 </span>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">
                   Sign in to access this feature
                 </h3>
               </div>
             </div>
 
-            <p className="text-sm text-slate-300 leading-relaxed mb-4">
-              Authenticate to manage conversations, view private records, and perform administrative actions.
+            <p className="text-xs font-medium text-slate-600 leading-relaxed mb-4">
+              Authenticate to manage live conversations, view private student phone records, and perform administrative operations.
             </p>
 
             {attemptedAction && (
-              <div className="mb-5 px-3 py-2 rounded-lg bg-cyan-950/40 border border-cyan-500/20 text-xs font-mono text-cyan-300 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Action requested: <strong className="text-white">{attemptedAction}</strong></span>
+              <div className="mb-4 px-3.5 py-2.5 rounded-2xl glass-pill text-xs font-semibold text-blue-700 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span>Action requested: <strong className="text-slate-900">{attemptedAction}</strong></span>
               </div>
             )}
 
-            <div className="space-y-2.5 text-xs text-slate-400 mb-6 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+            <div className="space-y-2 text-xs text-slate-600 mb-6 glass-card p-3.5 rounded-2xl border border-white/80">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>Interactive preview is available without credentials</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                 <span>Live records, phone numbers & Telegram replies require sign-in</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2.5">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleSignInRedirect}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl btn-luminous-primary text-sm font-bold shadow-md cursor-pointer"
               >
                 <Shield className="w-4 h-4" />
-                Sign In
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
+
               <button
                 onClick={closeAuthModal}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 font-medium text-sm transition-colors"
+                className="px-5 py-3 rounded-2xl glass-pill hover:bg-white text-xs font-bold text-slate-700 transition-colors cursor-pointer"
               >
                 Continue Exploring
               </button>
