@@ -45,8 +45,15 @@ class Settings(BaseSettings):
     TELEGRAM_WEBHOOK_SECRET: str = ""
     TELEGRAM_WEBHOOK_URL: str = ""
 
-    # ── Security ──────────────────────────────────────────────
+    # ── Security & Authentication ────────────────────────────
     APP_SECRET_KEY: str = "change-me-in-production"
+    FIREBASE_PROJECT_ID: str = "aiva-chatbot-55b17"
+    ADMIN_EMAILS: str = "admin@aiva.local,abhishektomar256@gmail.com,admin@university.edu"
+
+    @property
+    def admin_emails_set(self) -> set[str]:
+        """Set of allowed administrator emails for server-side role verification."""
+        return {e.strip().lower() for e in self.ADMIN_EMAILS.split(",") if e.strip()}
 
     # ── CORS ──────────────────────────────────────────────────
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"

@@ -15,6 +15,7 @@ import {
   BarChart3,
   Activity,
   Settings,
+  BookOpen,
   LogOut,
   Menu,
   X,
@@ -52,7 +53,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // The 11 core navigation sections for AIVA Chatbot Admin Dashboard
+  // The 12 core navigation sections for AIVA Chatbot Admin Dashboard
   const navItems = [
     { label: "Overview", href: "/admin", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
@@ -61,6 +62,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     { label: "Manual Operations", href: "/admin/operations", icon: FileText },
     { label: "Human Handover", href: "/admin/handovers", icon: ShieldAlert },
     { label: "Media Gallery", href: "/admin/media", icon: ImageIcon },
+    { label: "Knowledge & RAG", href: "/admin/knowledge", icon: BookOpen },
     { label: "Sessions", href: "/admin/sessions", icon: Clock },
     { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { label: "System Health", href: "/admin/health", icon: Activity },

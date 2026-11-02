@@ -116,25 +116,45 @@ async def get_current_user(
     settings = get_settings()
     user_id = None
     email = ""
+    assigned_role: Optional[str] = None
+    full_name: Optional[str] = None
 
     # 1. Try decoding as local signed Admin JWT
     try:
         payload = jwt.decode(token, settings.APP_SECRET_KEY, algorithms=["HS256"], issuer="aiva-admin")
         user_id = payload.get("sub")
         email = payload.get("email", "")
+        assigned_role = payload.get("role")
     except Exception:
-        # 2. Fall back to Supabase OAuth JWT
+        # 2. Try validating as Firebase Google ID token
         try:
-            user_payload = await _resolve_supabase_user(token)
-            user_id = user_payload.get("sub") or user_payload.get("id")
-            email = user_payload.get("email", "")
+            from app.integrations.firebase_auth import verify_firebase_id_token
+            import uuid
+
+            fb_payload = await verify_firebase_id_token(token)
+            fb_uid = fb_payload.get("sub") or fb_payload.get("user_id")
+            email = (fb_payload.get("email") or "").lower()
+            full_name = fb_payload.get("name") or fb_payload.get("displayName")
+            # Generate deterministic UUID for database compatibility
+            user_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"firebase:{fb_uid}"))
+            # Enforce server-side administrator allowlist
+            if email in settings.admin_emails_set:
+                assigned_role = "admin"
+            else:
+                assigned_role = "user"
         except Exception:
-            logger.warning("Token verification failed")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired session token",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            # 3. Fall back to Supabase OAuth JWT
+            try:
+                user_payload = await _resolve_supabase_user(token)
+                user_id = user_payload.get("sub") or user_payload.get("id")
+                email = user_payload.get("email", "")
+            except Exception:
+                logger.warning("Token verification failed across local JWT, Firebase, and Supabase")
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired session token",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
 
     if not user_id:
         raise HTTPException(
@@ -150,14 +170,22 @@ async def get_current_user(
     profile = result.scalar_one_or_none()
 
     if profile is None:
+        # Check if email is in admin allowlist
+        role_to_set = assigned_role or ("admin" if email in settings.admin_emails_set else "user")
         profile = Profile(
             id=UUID(str(user_id)),
             email=email,
-            role="user",
+            full_name=full_name,
+            role=role_to_set,
             is_active=True,
         )
         db.add(profile)
         await db.flush()
+    else:
+        # If user is in admin allowlist, ensure their database role reflects it
+        if email in settings.admin_emails_set and profile.role != "admin":
+            profile.role = "admin"
+            await db.flush()
 
     if not profile.is_active:
         raise HTTPException(
