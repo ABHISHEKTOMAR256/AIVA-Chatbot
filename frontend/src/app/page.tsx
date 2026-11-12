@@ -46,6 +46,14 @@ export default function LandingPage() {
     } catch (err: any) {
       if (err instanceof ApiError && err.status === 429) {
         setAdminError("Too many attempts. Rate limit active (please wait 15 minutes).");
+      } else if (
+        err?.message?.includes("Failed to fetch") ||
+        err?.message?.includes("NetworkError") ||
+        err?.status === 503
+      ) {
+        setAdminError(
+          "Backend server is offline (http://localhost:8000). Click 'Auto-Fill' above to authenticate in Demo Admin Mode, or start the backend."
+        );
       } else {
         setAdminError(err.message || "Invalid administrator credentials. Access denied.");
       }

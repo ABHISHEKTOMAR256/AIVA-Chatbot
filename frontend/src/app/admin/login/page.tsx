@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { adminLogin, ApiError } from "@/lib/api";
 import { signInWithGooglePopup } from "@/lib/firebase";
 import AivaRobot3D from "@/components/3d/AivaRobot3D";
-import { Shield, Lock, User, ArrowRight, AlertCircle, Bot, Sparkles } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, AlertCircle, Bot, Sparkles, KeyRound } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -35,6 +35,12 @@ export default function AdminLoginPage() {
     }
   };
 
+  const fillDemoAdmin = () => {
+    setIdentifier("admin@aiva.local");
+    setPassword("Admin@AIVA2026");
+    setError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -46,6 +52,12 @@ export default function AdminLoginPage() {
     } catch (err: any) {
       if (err instanceof ApiError && err.status === 429) {
         setError("Too many failed attempts. Security lock active. Please wait 15 minutes.");
+      } else if (
+        err?.message?.includes("Failed to fetch") ||
+        err?.message?.includes("NetworkError") ||
+        err?.status === 503
+      ) {
+        setError("Backend server is offline (http://localhost:8000). Click 'Auto-Fill' to log in in Demo Mode, or start the server.");
       } else {
         setError(err.message || "Invalid administrator credentials. Access denied.");
       }
@@ -87,6 +99,22 @@ export default function AdminLoginPage() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Quick Demo Credentials Pill */}
+          <div className="mb-5 p-3 rounded-2xl bg-blue-50/80 border border-blue-200/80 flex items-center justify-between gap-2">
+            <div className="text-left">
+              <span className="text-[11px] font-bold text-blue-900 block">Quick Demo Credentials</span>
+              <span className="text-[10px] text-blue-600 font-medium">admin@aiva.local • Admin@AIVA2026</span>
+            </div>
+            <button
+              type="button"
+              onClick={fillDemoAdmin}
+              className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Auto-Fill</span>
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
