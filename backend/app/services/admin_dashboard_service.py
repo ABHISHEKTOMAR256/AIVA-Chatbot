@@ -108,26 +108,31 @@ class AdminDashboardService:
         # 1. Fetch conversations created per day
         conv_stmt = (
             select(
-                func.date_trunc("day", Conversation.created_at).label("day"),
+                func.date(Conversation.created_at).label("day"),
                 func.count(Conversation.id).label("count"),
             )
             .where(Conversation.created_at >= start_date)
-            .group_by("day")
-            .order_by("day")
+            .group_by(func.date(Conversation.created_at))
+            .order_by(func.date(Conversation.created_at))
         )
         conv_res = (await db.execute(conv_stmt)).all()
-        conv_by_day = {row.day.strftime("%Y-%m-%d"): row.count for row in conv_res if row.day}
+        conv_by_day = {}
+        for row in conv_res:
+            if not row.day:
+                continue
+            d_str = row.day if isinstance(row.day, str) else row.day.strftime("%Y-%m-%d")
+            conv_by_day[d_str] = row.count
 
         # 2. Fetch messages received vs replies per day
         msg_stmt = (
             select(
-                func.date_trunc("day", Message.created_at).label("day"),
+                func.date(Message.created_at).label("day"),
                 Message.sender_type,
                 func.count(Message.id).label("count"),
             )
             .where(Message.created_at >= start_date)
-            .group_by("day", Message.sender_type)
-            .order_by("day")
+            .group_by(func.date(Message.created_at), Message.sender_type)
+            .order_by(func.date(Message.created_at))
         )
         msg_res = (await db.execute(msg_stmt)).all()
         received_by_day = {}
@@ -135,7 +140,7 @@ class AdminDashboardService:
         for row in msg_res:
             if not row.day:
                 continue
-            d_str = row.day.strftime("%Y-%m-%d")
+            d_str = row.day if isinstance(row.day, str) else row.day.strftime("%Y-%m-%d")
             if row.sender_type == "user":
                 received_by_day[d_str] = row.count
             elif row.sender_type in ("ai", "system"):
@@ -144,15 +149,20 @@ class AdminDashboardService:
         # 3. New users per day
         user_stmt = (
             select(
-                func.date_trunc("day", Profile.created_at).label("day"),
+                func.date(Profile.created_at).label("day"),
                 func.count(Profile.id).label("count"),
             )
             .where(Profile.created_at >= start_date)
-            .group_by("day")
-            .order_by("day")
+            .group_by(func.date(Profile.created_at))
+            .order_by(func.date(Profile.created_at))
         )
         user_res = (await db.execute(user_stmt)).all()
-        users_by_day = {row.day.strftime("%Y-%m-%d"): row.count for row in user_res if row.day}
+        users_by_day = {}
+        for row in user_res:
+            if not row.day:
+                continue
+            d_str = row.day if isinstance(row.day, str) else row.day.strftime("%Y-%m-%d")
+            users_by_day[d_str] = row.count
 
         # Build continuous timeline
         timeline = []
@@ -532,15 +542,18 @@ class AdminDashboardService:
         except Exception:
             ollama_available = False
 
-        # Last message timestamp
-        last_msg_time = await db.scalar(
-            select(func.max(Message.created_at))
-        )
-
-        # Recent errors count (analytics events with 'error' or failed messages)
-        failed_msgs = await db.scalar(
-            select(func.count(Message.id)).where(Message.processing_status == "failed")
-        ) or 0
+        # Last message timestamp and recent error metrics
+        last_msg_time = None
+        failed_msgs = 0
+        try:
+            last_msg_time = await db.scalar(
+                select(func.max(Message.created_at))
+            )
+            failed_msgs = await db.scalar(
+                select(func.count(Message.id)).where(Message.processing_status == "failed")
+            ) or 0
+        except Exception as metric_err:
+            logger.warning("Could not query DB telemetry metrics: %s", metric_err)
 
         return BotHealthResponse(
             bot_name="AIVA Virtual Assistant",

@@ -33,13 +33,12 @@ async def lifespan(app: FastAPI):
 
     logger.info("Starting AIVA Helpdesk API backend...")
 
-    # 1. Attempt DB connection check with quick timeout
+    # 1. Initialize DB connection (with automatic persistent fallback if primary is offline)
     try:
-        import asyncio
-        await asyncio.wait_for(init_db(), timeout=1.5)
-        logger.info("Database connection verified.")
+        await init_db()
+        logger.info("Database initialized successfully.")
     except Exception as exc:
-        logger.warning("Database connection check failed or timed out: %s", exc)
+        logger.warning("Database initialization error: %s", exc)
 
     # 2. Check Ollama availability with quick timeout
     try:
@@ -126,6 +125,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ── Health Check ───────────────────────────────────────────────────────────────
 @app.get("/health", tags=["system"])
+@app.get("/api/health", tags=["system"])
 async def health_check():
     """Health check endpoint for container monitors and uptime checkers."""
     return {
