@@ -30,6 +30,17 @@ logger = get_logger("telegram")
 # telegram_user_id -> {"state": "waiting_category", "data": {...}}
 _user_states: Dict[int, Dict[str, Any]] = {}
 
+# Persistent interactive menu keyboard presented below the input box
+MAIN_MENU_KEYBOARD = {
+    "keyboard": [
+        [{"text": "📋 File Complaint"}, {"text": "🔍 Lost & Found"}],
+        [{"text": "📊 Check Status"}, {"text": "🙋 Request Human Help"}],
+        [{"text": "📱 Share Contact Number", "request_contact": True}, {"text": "ℹ️ Hostel FAQ & Rules"}],
+    ],
+    "resize_keyboard": True,
+    "is_persistent": True,
+}
+
 
 class TelegramBot:
     """Handles Telegram Webhook updates and replies."""
@@ -40,6 +51,31 @@ class TelegramBot:
         self.bot_token = self.settings.TELEGRAM_BOT_TOKEN
         self.api_base = f"https://api.telegram.org/bot{self.bot_token}"
 
+    async def download_telegram_file(self, file_id: str) -> tuple[Optional[bytes], str]:
+        """Download a photo or document from Telegram API."""
+        if not self.bot_token:
+            return None, ""
+
+        get_file_url = f"{self.api_base}/getFile?file_id={file_id}"
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            try:
+                res = await client.get(get_file_url)
+                if res.status_code != 200:
+                    logger.warning("Failed getFile from Telegram: %s", res.text)
+                    return None, ""
+                data = res.json()
+                file_path = data.get("result", {}).get("file_path")
+                if not file_path:
+                    return None, ""
+
+                download_url = f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
+                dl_res = await client.get(download_url)
+                if dl_res.status_code == 200:
+                    return dl_res.content, file_path
+            except Exception as e:
+                logger.error("Error downloading file %s from Telegram: %s", file_id, e)
+        return None, ""
+
     async def send_message(
         self,
         chat_id: int,
@@ -47,10 +83,14 @@ class TelegramBot:
         parse_mode: Optional[str] = "Markdown",
         reply_markup: Optional[dict] = None,
     ) -> bool:
-        """Send message via Telegram Bot API."""
+        """Send message via Telegram Bot API with default persistent menu keyboard."""
         if not self.bot_token:
             logger.warning("Telegram Bot token not set. Message to %s suppressed: %s", chat_id, text)
             return False
+
+        # Default to persistent quick-action menu keyboard if no custom markup provided
+        if reply_markup is None:
+            reply_markup = MAIN_MENU_KEYBOARD
 
         url = f"{self.api_base}/sendMessage"
         payload: Dict[str, Any] = {
@@ -147,12 +187,19 @@ class TelegramBot:
             logger.info("Ignoring duplicate Telegram message %s", msg_id)
             return
 
+        caption = message.get("caption", "").strip()
+
         # If contact was shared
         if contact:
             await self._handle_contact_message(chat_id, profile, conversation, contact, msg_id)
             return
 
-        # Record incoming message in DB
+        # If photo was sent (with or without caption)
+        if photo:
+            await self._handle_photo_message(chat_id, profile, conversation, photo, msg_id, caption)
+            return
+
+        # Record incoming text message in DB
         conv_service = ConversationService()
         if text:
             await conv_service.add_message(
@@ -164,10 +211,25 @@ class TelegramBot:
                 telegram_message_id=msg_id,
             )
 
-        # If photo was sent
-        if photo and not text:
-            await self._handle_photo_message(chat_id, profile, conversation, photo, msg_id)
-            return
+        # Map persistent menu keyboard buttons to commands
+        menu_button_map = {
+            "📋 file complaint": "/complaint",
+            "file complaint": "/complaint",
+            "🔍 lost & found": "/lost",
+            "lost & found": "/lost",
+            "📊 check status": "/status",
+            "check status": "/status",
+            "🙋 request human help": "/human",
+            "request human help": "/human",
+            "human help": "/human",
+            "ℹ️ hostel faq & rules": "/help",
+            "hostel faq & rules": "/help",
+            "hostel faq": "/help",
+            "faq": "/help",
+        }
+        text_lower = text.lower().strip()
+        if text_lower in menu_button_map:
+            text = menu_button_map[text_lower]
 
         # Handle commands
         if text.startswith("/"):
@@ -331,7 +393,33 @@ class TelegramBot:
                 await self.send_message(chat_id, f"✅ Successfully linked Telegram to your web account (*{web_profile.email}*)!")
 
         elif command == "/lost":
-            await self.send_message(chat_id, "🔍 To report lost items or search the catalog, please visit the AIVA Web Portal or type your item description directly!")
+            from app.models.lost_found_item import LostFoundItem
+            items_res = await self.db.execute(
+                select(LostFoundItem)
+                .where(LostFoundItem.status == "open")
+                .order_by(LostFoundItem.created_at.desc())
+                .limit(6)
+            )
+            items = items_res.scalars().all()
+
+            msg = "🔍 *Hostel Lost & Found Desk*\n\n"
+            if items:
+                msg += "*Recent Cataloged Items in Storage:*\n"
+                for it in items:
+                    badge = "🟢 FOUND:" if it.item_type == "found" else "🔴 REPORTED LOST:"
+                    msg += f"• {badge} *{it.title}* ({it.category.capitalize()})\n  _Location:_ {it.location}\n"
+                msg += "\n"
+            else:
+                msg += "No unclaimed objects currently cataloged in storage.\n\n"
+
+            msg += (
+                "💡 *Commands & Actions:*\n"
+                "• To inquire about an item, type: `Did anyone find my [item]?`\n"
+                "• To report an item, type: `Found [item] at [location]` or `Lost [item]`\n"
+                "• View complete directory & photos on the website: `/lost-found`"
+            )
+            await self.send_message(chat_id, msg)
+            await conv_service.add_message(self.db, conversation_id=conversation.id, sender_type="ai", content=msg)
 
         else:
             await self.send_message(chat_id, "❓ Unknown command. Type `/help` for options.")
@@ -543,21 +631,75 @@ class TelegramBot:
         conversation: Conversation,
         photo_list: list,
         msg_id: int,
+        caption: str = "",
     ) -> None:
-        # Save placeholder for attachment
+        """Download uploaded photo from Telegram, store locally and in DB, and link to profile/complaint."""
         conv_service = ConversationService()
+        if not photo_list:
+            return
+
+        # 1. Largest photo is the last item in photo_list
+        best_photo = photo_list[-1]
+        file_id = best_photo.get("file_id")
+        file_bytes, tg_file_path = await self.download_telegram_file(file_id)
+
+        import uuid as _uuid
+        stored_filename = f"tg_{profile.telegram_id}_{_uuid.uuid4().hex[:8]}.jpg"
+        media_url = f"/media/{stored_filename}"
+
+        if file_bytes:
+            from pathlib import Path
+            uploads_dir = Path("data/uploads")
+            uploads_dir.mkdir(parents=True, exist_ok=True)
+            local_path = uploads_dir / stored_filename
+            try:
+                with open(local_path, "wb") as f:
+                    f.write(file_bytes)
+            except Exception as e:
+                logger.error("Failed saving Telegram photo to disk: %s", e)
+
+            # Check if user has an active or recent complaint to associate
+            from app.models.complaint import Complaint
+            from app.models.media_file import MediaFile
+            comp_stmt = (
+                select(Complaint.id)
+                .where(Complaint.user_id == profile.id)
+                .order_by(Complaint.created_at.desc())
+            )
+            latest_comp_id = (await self.db.execute(comp_stmt)).scalars().first()
+
+            media = MediaFile(
+                user_id=profile.id,
+                filename=f"Telegram_Photo_{msg_id}.jpg",
+                stored_filename=stored_filename,
+                mime_type="image/jpeg",
+                file_size=len(file_bytes),
+                storage_path=f"data/uploads/{stored_filename}",
+                bucket_name="aiva-media",
+                complaint_id=latest_comp_id,
+            )
+            self.db.add(media)
+            await self.db.flush()
+            logger.info("Saved Telegram photo %s (%d bytes) for user %s", stored_filename, len(file_bytes), profile.id)
+
+        # 2. Record message with image link and caption
+        display_caption = f" - {caption}" if caption else ""
         await conv_service.add_message(
             self.db,
             conversation_id=conversation.id,
             sender_type="user",
-            content="[Sent photo]",
+            content=f"📷 Photo: {media_url}{display_caption}",
             message_type="image",
             telegram_message_id=msg_id,
         )
-        await self.send_message(
-            chat_id,
-            "📷 Photo received and attached to your conversation records. If this relates to an issue, please file a complaint using `/complaint`.",
+
+        reply = (
+            "📸 *Photo received and uploaded to portal!*\n\n"
+            "Your photo has been securely archived and linked to your student profile.\n"
+            "Hostel staff and administrators can view this image directly on the Admin Dashboard."
         )
+        await self.send_message(chat_id, reply)
+        await conv_service.add_message(self.db, conversation_id=conversation.id, sender_type="ai", content=reply)
 
     async def _handle_contact_message(
         self,

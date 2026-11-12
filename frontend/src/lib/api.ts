@@ -227,9 +227,20 @@ export async function uploadMedia(
   return response.json();
 }
 
-export function getMediaUrl(path: string): string {
-  if (path.startsWith("http")) return path;
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${path}`;
+export function getMediaUrl(path?: string): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (path.startsWith("/media/") || path.startsWith("media/")) {
+    const cleanBase = API_URL.replace(/\/$/, "");
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    return `${cleanBase}${cleanPath}`;
+  }
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && !path.startsWith("data/uploads")) {
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${path}`;
+  }
+  const cleanBase = API_URL.replace(/\/$/, "");
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${cleanBase}${cleanPath}`;
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────

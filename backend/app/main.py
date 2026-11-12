@@ -135,6 +135,15 @@ async def health_check():
     }
 
 
+# ── Static Media Serving ───────────────────────────────────────────────────────
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+uploads_dir = Path("data/uploads")
+uploads_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=str(uploads_dir)), name="media")
+
+
 # ── Include Routers ────────────────────────────────────────────────────────────
 app.include_router(auth.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")

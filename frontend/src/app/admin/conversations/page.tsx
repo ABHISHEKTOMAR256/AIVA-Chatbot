@@ -24,6 +24,7 @@ import {
   pollConversationMessages,
   replyHandover,
   sendManualReply,
+  getMediaUrl,
 } from "@/lib/api";
 import { useGuestAuth } from "@/components/admin/GuestAuthContext";
 import type { AdminConversationItem, AdminConversationDetail } from "@/types";
@@ -431,7 +432,32 @@ function LiveConversationsContent() {
                           : "bg-gradient-to-tr from-cyan-600 to-blue-600 rounded-tr-none text-white"
                       }`}
                     >
-                      {m.content}
+                      {m.message_type === "image" || m.content.includes("/media/") ? (
+                        <div className="space-y-2">
+                          <p>{m.content.replace(/\/media\/[^\s]+/, "").trim() || "Uploaded Photo Attachment:"}</p>
+                          {(() => {
+                            const match = m.content.match(/\/media\/[^\s]+/);
+                            const imgPath = match ? match[0] : "";
+                            const fullUrl = imgPath ? getMediaUrl(imgPath) : "";
+                            return fullUrl ? (
+                              <a
+                                href={fullUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="block overflow-hidden rounded-xl border border-white/50 shadow-sm max-w-xs group cursor-pointer"
+                              >
+                                <img
+                                  src={fullUrl}
+                                  alt="Student upload"
+                                  className="max-h-56 w-auto object-cover group-hover:scale-105 transition-transform"
+                                />
+                              </a>
+                            ) : null;
+                          })()}
+                        </div>
+                      ) : (
+                        m.content
+                      )}
                     </div>
                   </div>
                 );

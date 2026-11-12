@@ -61,6 +61,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
     { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { label: "Chat History", href: "/admin/conversations", icon: MessageSquare },
     { label: "Chatbot Control", href: "/admin/control", icon: Bot },
+    { label: "Lost & Found", href: "/admin/lost-found", icon: Search },
     { label: "Operations", href: "/admin/operations", icon: FileText },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Handover", href: "/admin/handovers", icon: ShieldAlert },
