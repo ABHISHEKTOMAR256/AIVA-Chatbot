@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { signInWithGooglePopup } from "@/lib/firebase";
+import { adminLogin, ApiError } from "@/lib/api";
 import {
   Bot,
   MessageSquare,
@@ -15,6 +16,9 @@ import {
   Clock,
   ArrowRight,
   Send,
+  Lock,
+  X,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -24,6 +28,37 @@ export default function LandingPage() {
   const [signingIn, setSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const telegramBotUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "AIVA_LPU_bot";
+
+  // Admin login modal state
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminIdentifier, setAdminIdentifier] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+
+  const handleAdminLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError(null);
+    setAdminLoading(true);
+    try {
+      await adminLogin(adminIdentifier, adminPassword);
+      window.location.href = "/admin";
+    } catch (err: any) {
+      if (err instanceof ApiError && err.status === 429) {
+        setAdminError("Too many attempts. Rate limit active (please wait 15 minutes).");
+      } else {
+        setAdminError(err.message || "Invalid administrator credentials. Access denied.");
+      }
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const fillDemoAdmin = () => {
+    setAdminIdentifier("admin@aiva.local");
+    setAdminPassword("Admin@AIVA2026");
+    setAdminError(null);
+  };
 
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
@@ -73,20 +108,29 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              onClick={() => setShowAdminModal(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 sm:px-4 py-2 rounded-full glass-card hover:bg-white text-slate-800 shadow-sm transition-all cursor-pointer border border-blue-200/80 hover:border-blue-400"
+            >
+              <Lock className="w-3.5 h-3.5 text-blue-600" />
+              <span>Admin Login</span>
+            </button>
+
             <Link
               href="/admin"
-              className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full glass-card hover:bg-white text-blue-600 shadow-sm transition-all"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 sm:px-4 py-2 rounded-full glass-card hover:bg-white text-blue-600 shadow-sm transition-all"
             >
               <Shield className="w-3.5 h-3.5 text-blue-600" />
-              <span>3D Control Center</span>
+              <span className="hidden sm:inline">3D Control Center</span>
+              <span className="sm:hidden">Preview</span>
             </Link>
 
             <a
               href={`https://t.me/${telegramBotUser}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full glass-card hover:bg-white text-blue-700 shadow-sm transition-all"
+              className="hidden md:inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full glass-card hover:bg-white text-blue-700 shadow-sm transition-all"
             >
               <Send className="w-3.5 h-3.5 text-blue-600" />
               <span>Telegram Bot</span>
@@ -94,7 +138,7 @@ export default function LandingPage() {
 
             <button
               onClick={handleGoogleSignIn}
-              className="btn-luminous-primary rounded-full text-xs font-semibold px-5 py-2 cursor-pointer shadow-md"
+              className="btn-luminous-primary rounded-full text-xs font-semibold px-4 sm:px-5 py-2 cursor-pointer shadow-md"
             >
               Sign In with Google
             </button>
@@ -170,12 +214,20 @@ export default function LandingPage() {
             Chat on Telegram
           </a>
 
+          <button
+            onClick={() => setShowAdminModal(true)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full glass-card hover:bg-white text-slate-900 font-bold text-sm shadow-md transition-all cursor-pointer border border-blue-300/80 hover:border-blue-500 hover:scale-[1.02]"
+          >
+            <Lock className="w-4 h-4 text-blue-600" />
+            <span>Admin Login</span>
+          </button>
+
           <Link
             href="/admin"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full glass-card hover:bg-white text-blue-600 font-semibold text-sm shadow-md transition-all"
           >
             <Shield className="w-4 h-4 text-blue-600" />
-            3D Admin Center (Guest Mode)
+            <span>3D Admin Center (Guest Mode)</span>
           </Link>
         </div>
 
@@ -237,6 +289,117 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Admin Login Modal */}
+      {showAdminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-md p-6 sm:p-8 rounded-[32px] glass-card bg-white/95 text-slate-800 shadow-[0_25px_60px_rgba(90,115,210,0.25)] border border-white/70">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowAdminModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Header */}
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-[0_8px_20px_rgba(37,99,235,0.35)] mx-auto mb-3">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Admin Sign In</h2>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Access AIVA 3D Control Center &amp; Live Management
+              </p>
+            </div>
+
+            {/* Demo Quick Fill Banner */}
+            <div className="mb-4 p-3 rounded-2xl bg-blue-50/80 border border-blue-200/80 flex items-center justify-between gap-2">
+              <div className="text-left">
+                <span className="text-[11px] font-bold text-blue-900 block">Quick Demo Credentials</span>
+                <span className="text-[10px] text-blue-600 font-medium">admin@aiva.local • Admin@AIVA2026</span>
+              </div>
+              <button
+                type="button"
+                onClick={fillDemoAdmin}
+                className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Auto-Fill</span>
+              </button>
+            </div>
+
+            {adminError && (
+              <div className="mb-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 shadow-sm text-left">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+                <span>{adminError}</span>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleAdminLoginSubmit} className="space-y-4 text-left">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Admin Username or Email
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={adminIdentifier}
+                  onChange={(e) => setAdminIdentifier(e.target.value)}
+                  placeholder="admin@aiva.local"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none transition-all shadow-inner"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none transition-all shadow-inner"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={adminLoading}
+                className="btn-luminous-primary w-full py-3 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50 mt-2"
+              >
+                {adminLoading ? (
+                  <span>Authenticating...</span>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Sign In to Admin Portal</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <Link
+                href="/admin/login"
+                className="hover:text-blue-600 font-medium transition-colors"
+              >
+                Full Login Page →
+              </Link>
+              <Link
+                href="/admin"
+                className="hover:text-indigo-600 font-medium transition-colors"
+              >
+                Guest Preview →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
